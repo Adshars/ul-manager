@@ -27,4 +27,7 @@ class HiveRepositoryImpl @Inject constructor(
 
     override suspend fun deleteHive(id: Long) =
         dao.deleteHive(id)
+
+    override fun getActiveHiveCount(apiaryId: Long): Flow<Int> =
+        dao.getActiveHiveCount(apiaryId)
 }

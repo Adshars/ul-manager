@@ -9,4 +9,5 @@ interface HiveRepository {
     suspend fun insertHive(hive: Hive): Long
     suspend fun updateHive(hive: Hive)
     suspend fun deleteHive(id: Long)
+    fun getActiveHiveCount(apiaryId: Long): Flow<Int>
 }
