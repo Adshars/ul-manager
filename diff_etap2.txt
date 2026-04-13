@@ -1,0 +1,1312 @@
+﻿diff --git a/app/src/main/java/com/example/apiarymanager/data/dto/ApiaryDto.kt b/app/src/main/java/com/example/apiarymanager/data/dto/ApiaryDto.kt
+new file mode 100644
+index 0000000..de6531c
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/dto/ApiaryDto.kt
+@@ -0,0 +1,16 @@
++package com.example.apiarymanager.data.dto
++
++/**
++ * DTO representing the API contract for an Apiary.
++ * Field names match what the C# backend will return.
++ * When Retrofit is added, annotate with @SerializedName / @Json.
++ */
++data class ApiaryDto(
++    val id: Long,
++    val name: String,
++    val location: String,
++    val latitude: Double?,
++    val longitude: Double?,
++    val notes: String,
++    val createdAt: String   // ISO-8601: "2024-04-01"
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/data/dto/HiveDto.kt b/app/src/main/java/com/example/apiarymanager/data/dto/HiveDto.kt
+new file mode 100644
+index 0000000..f9b81cc
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/dto/HiveDto.kt
+@@ -0,0 +1,16 @@
++package com.example.apiarymanager.data.dto
++
++/**
++ * DTO representing the API contract for a Hive.
++ * [status] mirrors the C# enum name: "ACTIVE" | "WEAK" | "DEAD" | "SOLD"
++ */
++data class HiveDto(
++    val id: Long,
++    val apiaryId: Long,
++    val number: Int,
++    val name: String,
++    val queenYear: Int?,
++    val status: String,
++    val notes: String,
++    val installedAt: String  // ISO-8601: "2024-04-01"
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/data/dto/InspectionDto.kt b/app/src/main/java/com/example/apiarymanager/data/dto/InspectionDto.kt
+new file mode 100644
+index 0000000..fa466fd
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/dto/InspectionDto.kt
+@@ -0,0 +1,16 @@
++package com.example.apiarymanager.data.dto
++
++/**
++ * DTO representing the API contract for an Inspection.
++ * [broodCondition] mirrors enum: "EXCELLENT" | "GOOD" | "FAIR" | "POOR" | "NONE"
++ */
++data class InspectionDto(
++    val id: Long,
++    val hiveId: Long,
++    val date: String,           // ISO-8601
++    val queenSeen: Boolean,
++    val broodCondition: String,
++    val honeyStoresKg: Float,
++    val frameCount: Int,
++    val notes: String
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/data/dto/TaskDto.kt b/app/src/main/java/com/example/apiarymanager/data/dto/TaskDto.kt
+new file mode 100644
+index 0000000..650e736
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/dto/TaskDto.kt
+@@ -0,0 +1,17 @@
++package com.example.apiarymanager.data.dto
++
++/**
++ * DTO representing the API contract for a Task.
++ * [priority] mirrors enum: "LOW" | "MEDIUM" | "HIGH"
++ */
++data class TaskDto(
++    val id: Long,
++    val apiaryId: Long?,
++    val hiveId: Long?,
++    val title: String,
++    val description: String,
++    val dueDate: String?,       // ISO-8601 or null
++    val priority: String,
++    val isCompleted: Boolean,
++    val createdAt: String       // ISO-8601
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/data/local/dao/ApiaryDao.kt b/app/src/main/java/com/example/apiarymanager/data/local/dao/ApiaryDao.kt
+new file mode 100644
+index 0000000..54041ff
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/local/dao/ApiaryDao.kt
+@@ -0,0 +1,34 @@
++package com.example.apiarymanager.data.local.dao
++
++import androidx.room.Dao
++import androidx.room.Insert
++import androidx.room.OnConflictStrategy
++import androidx.room.Query
++import androidx.room.Update
++import com.example.apiarymanager.data.local.entity.ApiaryEntity
++import kotlinx.coroutines.flow.Flow
++
++@Dao
++interface ApiaryDao {
++
++    @Query("SELECT * FROM apiaries ORDER BY name ASC")
++    fun getAllApiaries(): Flow<List<ApiaryEntity>>
++
++    @Query("SELECT * FROM apiaries WHERE id = :id")
++    fun getApiaryById(id: Long): Flow<ApiaryEntity?>
++
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insertApiary(apiary: ApiaryEntity): Long
++
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insertAll(apiaries: List<ApiaryEntity>)
++
++    @Update
++    suspend fun updateApiary(apiary: ApiaryEntity)
++
++    @Query("DELETE FROM apiaries WHERE id = :id")
++    suspend fun deleteApiary(id: Long)
++
++    @Query("SELECT COUNT(*) FROM apiaries")
++    suspend fun count(): Int
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/data/local/dao/HiveDao.kt b/app/src/main/java/com/example/apiarymanager/data/local/dao/HiveDao.kt
+new file mode 100644
+index 0000000..87f1287
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/local/dao/HiveDao.kt
+@@ -0,0 +1,31 @@
++package com.example.apiarymanager.data.local.dao
++
++import androidx.room.Dao
++import androidx.room.Insert
++import androidx.room.OnConflictStrategy
++import androidx.room.Query
++import androidx.room.Update
++import com.example.apiarymanager.data.local.entity.HiveEntity
++import kotlinx.coroutines.flow.Flow
++
++@Dao
++interface HiveDao {
++
++    @Query("SELECT * FROM hives WHERE apiary_id = :apiaryId ORDER BY number ASC")
++    fun getHivesByApiary(apiaryId: Long): Flow<List<HiveEntity>>
++
++    @Query("SELECT * FROM hives WHERE id = :id")
++    fun getHiveById(id: Long): Flow<HiveEntity?>
++
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insertHive(hive: HiveEntity): Long
++
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insertAll(hives: List<HiveEntity>)
++
++    @Update
++    suspend fun updateHive(hive: HiveEntity)
++
++    @Query("DELETE FROM hives WHERE id = :id")
++    suspend fun deleteHive(id: Long)
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/data/local/dao/InspectionDao.kt b/app/src/main/java/com/example/apiarymanager/data/local/dao/InspectionDao.kt
+new file mode 100644
+index 0000000..e020141
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/local/dao/InspectionDao.kt
+@@ -0,0 +1,31 @@
++package com.example.apiarymanager.data.local.dao
++
++import androidx.room.Dao
++import androidx.room.Insert
++import androidx.room.OnConflictStrategy
++import androidx.room.Query
++import androidx.room.Update
++import com.example.apiarymanager.data.local.entity.InspectionEntity
++import kotlinx.coroutines.flow.Flow
++
++@Dao
++interface InspectionDao {
++
++    @Query("SELECT * FROM inspections WHERE hive_id = :hiveId ORDER BY date DESC")
++    fun getInspectionsByHive(hiveId: Long): Flow<List<InspectionEntity>>
++
++    @Query("SELECT * FROM inspections WHERE id = :id")
++    fun getInspectionById(id: Long): Flow<InspectionEntity?>
++
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insertInspection(inspection: InspectionEntity): Long
++
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insertAll(inspections: List<InspectionEntity>)
++
++    @Update
++    suspend fun updateInspection(inspection: InspectionEntity)
++
++    @Query("DELETE FROM inspections WHERE id = :id")
++    suspend fun deleteInspection(id: Long)
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/data/local/dao/TaskDao.kt b/app/src/main/java/com/example/apiarymanager/data/local/dao/TaskDao.kt
+new file mode 100644
+index 0000000..9e1dab2
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/local/dao/TaskDao.kt
+@@ -0,0 +1,40 @@
++package com.example.apiarymanager.data.local.dao
++
++import androidx.room.Dao
++import androidx.room.Insert
++import androidx.room.OnConflictStrategy
++import androidx.room.Query
++import androidx.room.Update
++import com.example.apiarymanager.data.local.entity.TaskEntity
++import kotlinx.coroutines.flow.Flow
++
++@Dao
++interface TaskDao {
++
++    @Query("SELECT * FROM tasks ORDER BY due_date ASC, priority DESC")
++    fun getAllTasks(): Flow<List<TaskEntity>>
++
++    @Query("SELECT * FROM tasks WHERE apiary_id = :apiaryId ORDER BY due_date ASC")
++    fun getTasksByApiary(apiaryId: Long): Flow<List<TaskEntity>>
++
++    @Query("SELECT * FROM tasks WHERE hive_id = :hiveId ORDER BY due_date ASC")
++    fun getTasksByHive(hiveId: Long): Flow<List<TaskEntity>>
++
++    @Query("SELECT * FROM tasks WHERE id = :id")
++    fun getTaskById(id: Long): Flow<TaskEntity?>
++
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insertTask(task: TaskEntity): Long
++
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insertAll(tasks: List<TaskEntity>)
++
++    @Update
++    suspend fun updateTask(task: TaskEntity)
++
++    @Query("DELETE FROM tasks WHERE id = :id")
++    suspend fun deleteTask(id: Long)
++
++    @Query("UPDATE tasks SET is_completed = :completed WHERE id = :id")
++    suspend fun setCompleted(id: Long, completed: Boolean)
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/data/local/database/ApiaryManagerDatabase.kt b/app/src/main/java/com/example/apiarymanager/data/local/database/ApiaryManagerDatabase.kt
+new file mode 100644
+index 0000000..e57b42c
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/local/database/ApiaryManagerDatabase.kt
+@@ -0,0 +1,33 @@
++package com.example.apiarymanager.data.local.database
++
++import androidx.room.Database
++import androidx.room.RoomDatabase
++import com.example.apiarymanager.data.local.dao.ApiaryDao
++import com.example.apiarymanager.data.local.dao.HiveDao
++import com.example.apiarymanager.data.local.dao.InspectionDao
++import com.example.apiarymanager.data.local.dao.TaskDao
++import com.example.apiarymanager.data.local.entity.ApiaryEntity
++import com.example.apiarymanager.data.local.entity.HiveEntity
++import com.example.apiarymanager.data.local.entity.InspectionEntity
++import com.example.apiarymanager.data.local.entity.TaskEntity
++
++@Database(
++    entities = [
++        ApiaryEntity::class,
++        HiveEntity::class,
++        InspectionEntity::class,
++        TaskEntity::class
++    ],
++    version = 1,
++    exportSchema = false
++)
++abstract class ApiaryManagerDatabase : RoomDatabase() {
++    abstract fun apiaryDao(): ApiaryDao
++    abstract fun hiveDao(): HiveDao
++    abstract fun inspectionDao(): InspectionDao
++    abstract fun taskDao(): TaskDao
++
++    companion object {
++        const val DATABASE_NAME = "apiary_manager.db"
++    }
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/data/local/entity/ApiaryEntity.kt b/app/src/main/java/com/example/apiarymanager/data/local/entity/ApiaryEntity.kt
+new file mode 100644
+index 0000000..0678d1f
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/local/entity/ApiaryEntity.kt
+@@ -0,0 +1,30 @@
++package com.example.apiarymanager.data.local.entity
++
++import androidx.room.ColumnInfo
++import androidx.room.Entity
++import androidx.room.PrimaryKey
++
++@Entity(tableName = "apiaries")
++data class ApiaryEntity(
++    @PrimaryKey(autoGenerate = true)
++    val id: Long = 0,
++
++    @ColumnInfo(name = "name")
++    val name: String,
++
++    @ColumnInfo(name = "location")
++    val location: String,
++
++    @ColumnInfo(name = "latitude")
++    val latitude: Double?,
++
++    @ColumnInfo(name = "longitude")
++    val longitude: Double?,
++
++    @ColumnInfo(name = "notes")
++    val notes: String,
++
++    /** Stored as epoch day (LocalDate.toEpochDay()) */
++    @ColumnInfo(name = "created_at")
++    val createdAt: Long
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/data/local/entity/HiveEntity.kt b/app/src/main/java/com/example/apiarymanager/data/local/entity/HiveEntity.kt
+new file mode 100644
+index 0000000..8515352
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/local/entity/HiveEntity.kt
+@@ -0,0 +1,47 @@
++package com.example.apiarymanager.data.local.entity
++
++import androidx.room.ColumnInfo
++import androidx.room.Entity
++import androidx.room.ForeignKey
++import androidx.room.Index
++import androidx.room.PrimaryKey
++
++@Entity(
++    tableName = "hives",
++    foreignKeys = [
++        ForeignKey(
++            entity = ApiaryEntity::class,
++            parentColumns = ["id"],
++            childColumns = ["apiary_id"],
++            onDelete = ForeignKey.CASCADE
++        )
++    ],
++    indices = [Index("apiary_id")]
++)
++data class HiveEntity(
++    @PrimaryKey(autoGenerate = true)
++    val id: Long = 0,
++
++    @ColumnInfo(name = "apiary_id")
++    val apiaryId: Long,
++
++    @ColumnInfo(name = "number")
++    val number: Int,
++
++    @ColumnInfo(name = "name")
++    val name: String,
++
++    @ColumnInfo(name = "queen_year")
++    val queenYear: Int?,
++
++    /** Stored as enum name string */
++    @ColumnInfo(name = "status")
++    val status: String,
++
++    @ColumnInfo(name = "notes")
++    val notes: String,
++
++    /** Stored as epoch day */
++    @ColumnInfo(name = "installed_at")
++    val installedAt: Long
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/data/local/entity/InspectionEntity.kt b/app/src/main/java/com/example/apiarymanager/data/local/entity/InspectionEntity.kt
+new file mode 100644
+index 0000000..fd30bde
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/local/entity/InspectionEntity.kt
+@@ -0,0 +1,47 @@
++package com.example.apiarymanager.data.local.entity
++
++import androidx.room.ColumnInfo
++import androidx.room.Entity
++import androidx.room.ForeignKey
++import androidx.room.Index
++import androidx.room.PrimaryKey
++
++@Entity(
++    tableName = "inspections",
++    foreignKeys = [
++        ForeignKey(
++            entity = HiveEntity::class,
++            parentColumns = ["id"],
++            childColumns = ["hive_id"],
++            onDelete = ForeignKey.CASCADE
++        )
++    ],
++    indices = [Index("hive_id")]
++)
++data class InspectionEntity(
++    @PrimaryKey(autoGenerate = true)
++    val id: Long = 0,
++
++    @ColumnInfo(name = "hive_id")
++    val hiveId: Long,
++
++    /** Stored as epoch day */
++    @ColumnInfo(name = "date")
++    val date: Long,
++
++    @ColumnInfo(name = "queen_seen")
++    val queenSeen: Boolean,
++
++    /** Stored as enum name string */
++    @ColumnInfo(name = "brood_condition")
++    val broodCondition: String,
++
++    @ColumnInfo(name = "honey_stores_kg")
++    val honeyStoresKg: Float,
++
++    @ColumnInfo(name = "frame_count")
++    val frameCount: Int,
++
++    @ColumnInfo(name = "notes")
++    val notes: String
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/data/local/entity/TaskEntity.kt b/app/src/main/java/com/example/apiarymanager/data/local/entity/TaskEntity.kt
+new file mode 100644
+index 0000000..94ee60b
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/local/entity/TaskEntity.kt
+@@ -0,0 +1,57 @@
++package com.example.apiarymanager.data.local.entity
++
++import androidx.room.ColumnInfo
++import androidx.room.Entity
++import androidx.room.ForeignKey
++import androidx.room.Index
++import androidx.room.PrimaryKey
++
++@Entity(
++    tableName = "tasks",
++    foreignKeys = [
++        ForeignKey(
++            entity = ApiaryEntity::class,
++            parentColumns = ["id"],
++            childColumns = ["apiary_id"],
++            onDelete = ForeignKey.SET_NULL
++        ),
++        ForeignKey(
++            entity = HiveEntity::class,
++            parentColumns = ["id"],
++            childColumns = ["hive_id"],
++            onDelete = ForeignKey.SET_NULL
++        )
++    ],
++    indices = [Index("apiary_id"), Index("hive_id")]
++)
++data class TaskEntity(
++    @PrimaryKey(autoGenerate = true)
++    val id: Long = 0,
++
++    @ColumnInfo(name = "apiary_id")
++    val apiaryId: Long?,
++
++    @ColumnInfo(name = "hive_id")
++    val hiveId: Long?,
++
++    @ColumnInfo(name = "title")
++    val title: String,
++
++    @ColumnInfo(name = "description")
++    val description: String,
++
++    /** Stored as epoch day, nullable */
++    @ColumnInfo(name = "due_date")
++    val dueDate: Long?,
++
++    /** Stored as enum name string */
++    @ColumnInfo(name = "priority")
++    val priority: String,
++
++    @ColumnInfo(name = "is_completed")
++    val isCompleted: Boolean,
++
++    /** Stored as epoch day */
++    @ColumnInfo(name = "created_at")
++    val createdAt: Long
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/data/local/seeder/DatabaseSeeder.kt b/app/src/main/java/com/example/apiarymanager/data/local/seeder/DatabaseSeeder.kt
+new file mode 100644
+index 0000000..4bde474
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/local/seeder/DatabaseSeeder.kt
+@@ -0,0 +1,112 @@
++package com.example.apiarymanager.data.local.seeder
++
++import com.example.apiarymanager.data.dto.ApiaryDto
++import com.example.apiarymanager.data.dto.HiveDto
++import com.example.apiarymanager.data.dto.InspectionDto
++import com.example.apiarymanager.data.dto.TaskDto
++import com.example.apiarymanager.data.local.database.ApiaryManagerDatabase
++import com.example.apiarymanager.data.mapper.toEntity
++
++/**
++ * Seeds the database with mock data on first install.
++ * Called once from [DatabaseModule] via RoomDatabase.Callback.onCreate.
++ *
++ * All data goes through the DTO Ôćĺ Entity mapping chain to ensure
++ * the full pipeline is exercised even with mock data.
++ */
++object DatabaseSeeder {
++
++    suspend fun seed(db: ApiaryManagerDatabase) {
++        seedApiaries(db)
++        seedHives(db)
++        seedInspections(db)
++        seedTasks(db)
++    }
++
++    // ÔöÇÔöÇÔöÇ Apiaries ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++    private suspend fun seedApiaries(db: ApiaryManagerDatabase) {
++        val apiaries = listOf(
++            ApiaryDto(
++                id        = 1,
++                name      = "Pasieka Le┼Ťna",
++                location  = "Bory Tucholskie, pow. Tuchola",
++                latitude  = 53.5837,
++                longitude = 17.8382,
++                notes     = "G┼é├│wna pasieka przy skraju lasu. Dobre po┼╝ytki lipowe.",
++                createdAt = "2022-04-15"
++            ),
++            ApiaryDto(
++                id        = 2,
++                name      = "Pasieka Ogrodowa",
++                location  = "Gda┼äsk-Oliwa",
++                latitude  = 54.4068,
++                longitude = 18.5601,
++                notes     = "Pasieka miejska w ogrodzie botanicznym.",
++                createdAt = "2023-03-20"
++            )
++        )
++        db.apiaryDao().insertAll(apiaries.map { it.toEntity() })
++    }
++
++    // ÔöÇÔöÇÔöÇ Hives ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++    private suspend fun seedHives(db: ApiaryManagerDatabase) {
++        val hives = listOf(
++            // Pasieka Le┼Ťna (apiaryId = 1)
++            HiveDto(1, 1, 1, "Alfa",   2022, "ACTIVE", "Silna rodzina, dobra matka.",          "2022-04-20"),
++            HiveDto(2, 1, 2, "Beta",   2023, "ACTIVE", "Wzorowa produkcja miodu.",              "2022-05-01"),
++            HiveDto(3, 1, 3, "Gamma",  2021, "WEAK",   "Wymaga dokarmiania.",                  "2021-06-10"),
++            HiveDto(4, 1, 4, "Delta",  null, "ACTIVE", "Nowy r├│j z podzia┼éu Alfa.",             "2024-06-01"),
++            // Pasieka Ogrodowa (apiaryId = 2)
++            HiveDto(5, 2, 1, "Omega",  2023, "ACTIVE", "┼üagodna rodzina, polecana do miasta.", "2023-03-25"),
++            HiveDto(6, 2, 2, "Sigma",  2022, "ACTIVE", "Dobra zbi├│rka nektaru.",               "2023-04-10"),
++            HiveDto(7, 2, 3, "Theta",  2021, "WEAK",   "Matka stara, planowa wymiana.",        "2023-04-10"),
++            HiveDto(8, 2, 4, "Lambda", null, "DEAD",   "Familia pad┼éa zim─ů 2023/2024.",        "2023-05-01")
++        )
++        db.hiveDao().insertAll(hives.map { it.toEntity() })
++    }
++
++    // ÔöÇÔöÇÔöÇ Inspections ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++    private suspend fun seedInspections(db: ApiaryManagerDatabase) {
++        val inspections = listOf(
++            // Ul Alfa
++            InspectionDto(1,  1, "2024-04-10", true,  "EXCELLENT", 4.5f, 10, "Matka aktywna, pi─Ökny czerw."),
++            InspectionDto(2,  1, "2024-05-15", true,  "GOOD",      8.2f, 12, "Gotowe do odbierania miodu."),
++            // Ul Beta
++            InspectionDto(3,  2, "2024-04-10", true,  "EXCELLENT", 5.0f, 11, "Wzorcowa rodzina."),
++            InspectionDto(4,  2, "2024-05-15", true,  "EXCELLENT", 9.5f, 12, "Odebrano 4 kg miodu."),
++            // Ul Gamma
++            InspectionDto(5,  3, "2024-04-12", false, "POOR",      1.2f,  7, "Matki nie wida─ç. Dokarmianie syropem."),
++            InspectionDto(6,  3, "2024-05-16", true,  "FAIR",      2.5f,  8, "Matka odnaleziona po tygodniu."),
++            // Ul Delta
++            InspectionDto(7,  4, "2024-06-05", true,  "GOOD",      1.0f,  6, "Nowy r├│j dobrze przyj─ů┼é ul."),
++            // Ul Omega
++            InspectionDto(8,  5, "2024-04-11", true,  "GOOD",      3.8f,  9, "Spokojne pszczo┼éy."),
++            InspectionDto(9,  5, "2024-05-20", true,  "EXCELLENT", 7.0f, 11, "Bardzo dobry sezon."),
++            // Ul Sigma
++            InspectionDto(10, 6, "2024-04-11", true,  "GOOD",      4.0f, 10, "Normalna aktywno┼Ť─ç."),
++            // Ul Theta
++            InspectionDto(11, 7, "2024-04-12", true,  "FAIR",      2.0f,  8, "Matka 3-letnia. Planowana wymiana."),
++            // Ul Lambda ÔÇö ostatni przegl─ůd przed upadkiem
++            InspectionDto(12, 8, "2023-10-20", true,  "POOR",      0.5f,  5, "Rodzina s┼éaba wchodz─ůca w zim─Ö.")
++        )
++        db.inspectionDao().insertAll(inspections.map { it.toEntity() })
++    }
++
++    // ÔöÇÔöÇÔöÇ Tasks ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++    private suspend fun seedTasks(db: ApiaryManagerDatabase) {
++        val tasks = listOf(
++            TaskDto(1, 1,    null, "Odbi├│r miodu ÔÇö Pasieka Le┼Ťna",      "Zebra─ç plastry z uli Beta i Alfa.",   "2024-06-10", "HIGH",   false, "2024-05-20"),
++            TaskDto(2, null, 3,    "Wymiana matki ÔÇö ul Gamma",           "Zam├│wi─ç unasienion─ů matk─Ö z hodowli.","2024-06-01", "HIGH",   false, "2024-05-16"),
++            TaskDto(3, null, 7,    "Wymiana matki ÔÇö ul Theta",           "Stara matka, obni┼╝ona produkcja.",    "2024-06-15", "MEDIUM", false, "2024-05-20"),
++            TaskDto(4, 2,    null, "Kontrola zimowli ÔÇö Pasieka Ogrodowa","Sprawdzi─ç zapasy przed zim─ů.",        "2024-10-01", "MEDIUM", false, "2024-05-20"),
++            TaskDto(5, 1,    null, "Leczenie warrozy ÔÇö Pasieka Le┼Ťna",   "Zastosowa─ç Apivar po zbiorach.",      "2024-08-01", "HIGH",   false, "2024-05-20"),
++            TaskDto(6, null, 4,    "Obserwacja roju Delta",              "Sprawdzi─ç przyj─Öcie si─Ö roju.",       "2024-06-12", "LOW",    true,  "2024-06-05"),
++            TaskDto(7, 1,    null, "Malowanie uli",                      "Od┼Ťwie┼╝y─ç pow┼éok─Ö 3 uli w pasiece.", "2024-09-01", "LOW",    false, "2024-05-01")
++        )
++        db.taskDao().insertAll(tasks.map { it.toEntity() })
++    }
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/data/mapper/ApiaryMapper.kt b/app/src/main/java/com/example/apiarymanager/data/mapper/ApiaryMapper.kt
+new file mode 100644
+index 0000000..a4c39d1
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/mapper/ApiaryMapper.kt
+@@ -0,0 +1,42 @@
++package com.example.apiarymanager.data.mapper
++
++import com.example.apiarymanager.data.dto.ApiaryDto
++import com.example.apiarymanager.data.local.entity.ApiaryEntity
++import com.example.apiarymanager.domain.model.Apiary
++import java.time.LocalDate
++
++// ÔöÇÔöÇÔöÇ DTO Ôćĺ Entity ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++fun ApiaryDto.toEntity(): ApiaryEntity = ApiaryEntity(
++    id        = id,
++    name      = name,
++    location  = location,
++    latitude  = latitude,
++    longitude = longitude,
++    notes     = notes,
++    createdAt = LocalDate.parse(createdAt).toEpochDay()
++)
++
++// ÔöÇÔöÇÔöÇ Entity Ôćĺ Domain ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++fun ApiaryEntity.toDomain(): Apiary = Apiary(
++    id        = id,
++    name      = name,
++    location  = location,
++    latitude  = latitude,
++    longitude = longitude,
++    notes     = notes,
++    createdAt = LocalDate.ofEpochDay(createdAt)
++)
++
++// ÔöÇÔöÇÔöÇ Domain Ôćĺ Entity (for local CRUD from UI) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++fun Apiary.toEntity(): ApiaryEntity = ApiaryEntity(
++    id        = id,
++    name      = name,
++    location  = location,
++    latitude  = latitude,
++    longitude = longitude,
++    notes     = notes,
++    createdAt = createdAt.toEpochDay()
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/data/mapper/HiveMapper.kt b/app/src/main/java/com/example/apiarymanager/data/mapper/HiveMapper.kt
+new file mode 100644
+index 0000000..8a0581d
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/mapper/HiveMapper.kt
+@@ -0,0 +1,46 @@
++package com.example.apiarymanager.data.mapper
++
++import com.example.apiarymanager.data.dto.HiveDto
++import com.example.apiarymanager.data.local.entity.HiveEntity
++import com.example.apiarymanager.domain.model.Hive
++import com.example.apiarymanager.domain.model.HiveStatus
++import java.time.LocalDate
++
++// ÔöÇÔöÇÔöÇ DTO Ôćĺ Entity ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++fun HiveDto.toEntity(): HiveEntity = HiveEntity(
++    id          = id,
++    apiaryId    = apiaryId,
++    number      = number,
++    name        = name,
++    queenYear   = queenYear,
++    status      = status,
++    notes       = notes,
++    installedAt = LocalDate.parse(installedAt).toEpochDay()
++)
++
++// ÔöÇÔöÇÔöÇ Entity Ôćĺ Domain ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++fun HiveEntity.toDomain(): Hive = Hive(
++    id          = id,
++    apiaryId    = apiaryId,
++    number      = number,
++    name        = name,
++    queenYear   = queenYear,
++    status      = HiveStatus.valueOf(status),
++    notes       = notes,
++    installedAt = LocalDate.ofEpochDay(installedAt)
++)
++
++// ÔöÇÔöÇÔöÇ Domain Ôćĺ Entity ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++fun Hive.toEntity(): HiveEntity = HiveEntity(
++    id          = id,
++    apiaryId    = apiaryId,
++    number      = number,
++    name        = name,
++    queenYear   = queenYear,
++    status      = status.name,
++    notes       = notes,
++    installedAt = installedAt.toEpochDay()
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/data/mapper/InspectionMapper.kt b/app/src/main/java/com/example/apiarymanager/data/mapper/InspectionMapper.kt
+new file mode 100644
+index 0000000..7a21b34
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/mapper/InspectionMapper.kt
+@@ -0,0 +1,46 @@
++package com.example.apiarymanager.data.mapper
++
++import com.example.apiarymanager.data.dto.InspectionDto
++import com.example.apiarymanager.data.local.entity.InspectionEntity
++import com.example.apiarymanager.domain.model.BroodCondition
++import com.example.apiarymanager.domain.model.Inspection
++import java.time.LocalDate
++
++// ÔöÇÔöÇÔöÇ DTO Ôćĺ Entity ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++fun InspectionDto.toEntity(): InspectionEntity = InspectionEntity(
++    id             = id,
++    hiveId         = hiveId,
++    date           = LocalDate.parse(date).toEpochDay(),
++    queenSeen      = queenSeen,
++    broodCondition = broodCondition,
++    honeyStoresKg  = honeyStoresKg,
++    frameCount     = frameCount,
++    notes          = notes
++)
++
++// ÔöÇÔöÇÔöÇ Entity Ôćĺ Domain ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++fun InspectionEntity.toDomain(): Inspection = Inspection(
++    id             = id,
++    hiveId         = hiveId,
++    date           = LocalDate.ofEpochDay(date),
++    queenSeen      = queenSeen,
++    broodCondition = BroodCondition.valueOf(broodCondition),
++    honeyStoresKg  = honeyStoresKg,
++    frameCount     = frameCount,
++    notes          = notes
++)
++
++// ÔöÇÔöÇÔöÇ Domain Ôćĺ Entity ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++fun Inspection.toEntity(): InspectionEntity = InspectionEntity(
++    id             = id,
++    hiveId         = hiveId,
++    date           = date.toEpochDay(),
++    queenSeen      = queenSeen,
++    broodCondition = broodCondition.name,
++    honeyStoresKg  = honeyStoresKg,
++    frameCount     = frameCount,
++    notes          = notes
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/data/mapper/TaskMapper.kt b/app/src/main/java/com/example/apiarymanager/data/mapper/TaskMapper.kt
+new file mode 100644
+index 0000000..6d673e5
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/mapper/TaskMapper.kt
+@@ -0,0 +1,49 @@
++package com.example.apiarymanager.data.mapper
++
++import com.example.apiarymanager.data.dto.TaskDto
++import com.example.apiarymanager.data.local.entity.TaskEntity
++import com.example.apiarymanager.domain.model.Task
++import com.example.apiarymanager.domain.model.TaskPriority
++import java.time.LocalDate
++
++// ÔöÇÔöÇÔöÇ DTO Ôćĺ Entity ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++fun TaskDto.toEntity(): TaskEntity = TaskEntity(
++    id          = id,
++    apiaryId    = apiaryId,
++    hiveId      = hiveId,
++    title       = title,
++    description = description,
++    dueDate     = dueDate?.let { LocalDate.parse(it).toEpochDay() },
++    priority    = priority,
++    isCompleted = isCompleted,
++    createdAt   = LocalDate.parse(createdAt).toEpochDay()
++)
++
++// ÔöÇÔöÇÔöÇ Entity Ôćĺ Domain ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++fun TaskEntity.toDomain(): Task = Task(
++    id          = id,
++    apiaryId    = apiaryId,
++    hiveId      = hiveId,
++    title       = title,
++    description = description,
++    dueDate     = dueDate?.let { LocalDate.ofEpochDay(it) },
++    priority    = TaskPriority.valueOf(priority),
++    isCompleted = isCompleted,
++    createdAt   = LocalDate.ofEpochDay(createdAt)
++)
++
++// ÔöÇÔöÇÔöÇ Domain Ôćĺ Entity ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
++
++fun Task.toEntity(): TaskEntity = TaskEntity(
++    id          = id,
++    apiaryId    = apiaryId,
++    hiveId      = hiveId,
++    title       = title,
++    description = description,
++    dueDate     = dueDate?.toEpochDay(),
++    priority    = priority.name,
++    isCompleted = isCompleted,
++    createdAt   = createdAt.toEpochDay()
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/data/repository/ApiaryRepositoryImpl.kt b/app/src/main/java/com/example/apiarymanager/data/repository/ApiaryRepositoryImpl.kt
+new file mode 100644
+index 0000000..3e0d25c
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/repository/ApiaryRepositoryImpl.kt
+@@ -0,0 +1,30 @@
++package com.example.apiarymanager.data.repository
++
++import com.example.apiarymanager.data.local.dao.ApiaryDao
++import com.example.apiarymanager.data.mapper.toDomain
++import com.example.apiarymanager.data.mapper.toEntity
++import com.example.apiarymanager.domain.model.Apiary
++import com.example.apiarymanager.domain.repository.ApiaryRepository
++import kotlinx.coroutines.flow.Flow
++import kotlinx.coroutines.flow.map
++import javax.inject.Inject
++
++class ApiaryRepositoryImpl @Inject constructor(
++    private val dao: ApiaryDao
++) : ApiaryRepository {
++
++    override fun getAllApiaries(): Flow<List<Apiary>> =
++        dao.getAllApiaries().map { entities -> entities.map { it.toDomain() } }
++
++    override fun getApiaryById(id: Long): Flow<Apiary?> =
++        dao.getApiaryById(id).map { it?.toDomain() }
++
++    override suspend fun insertApiary(apiary: Apiary): Long =
++        dao.insertApiary(apiary.toEntity())
++
++    override suspend fun updateApiary(apiary: Apiary) =
++        dao.updateApiary(apiary.toEntity())
++
++    override suspend fun deleteApiary(id: Long) =
++        dao.deleteApiary(id)
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/data/repository/HiveRepositoryImpl.kt b/app/src/main/java/com/example/apiarymanager/data/repository/HiveRepositoryImpl.kt
+new file mode 100644
+index 0000000..14ec294
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/repository/HiveRepositoryImpl.kt
+@@ -0,0 +1,30 @@
++package com.example.apiarymanager.data.repository
++
++import com.example.apiarymanager.data.local.dao.HiveDao
++import com.example.apiarymanager.data.mapper.toDomain
++import com.example.apiarymanager.data.mapper.toEntity
++import com.example.apiarymanager.domain.model.Hive
++import com.example.apiarymanager.domain.repository.HiveRepository
++import kotlinx.coroutines.flow.Flow
++import kotlinx.coroutines.flow.map
++import javax.inject.Inject
++
++class HiveRepositoryImpl @Inject constructor(
++    private val dao: HiveDao
++) : HiveRepository {
++
++    override fun getHivesByApiary(apiaryId: Long): Flow<List<Hive>> =
++        dao.getHivesByApiary(apiaryId).map { entities -> entities.map { it.toDomain() } }
++
++    override fun getHiveById(id: Long): Flow<Hive?> =
++        dao.getHiveById(id).map { it?.toDomain() }
++
++    override suspend fun insertHive(hive: Hive): Long =
++        dao.insertHive(hive.toEntity())
++
++    override suspend fun updateHive(hive: Hive) =
++        dao.updateHive(hive.toEntity())
++
++    override suspend fun deleteHive(id: Long) =
++        dao.deleteHive(id)
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/data/repository/InspectionRepositoryImpl.kt b/app/src/main/java/com/example/apiarymanager/data/repository/InspectionRepositoryImpl.kt
+new file mode 100644
+index 0000000..b0c4a46
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/repository/InspectionRepositoryImpl.kt
+@@ -0,0 +1,30 @@
++package com.example.apiarymanager.data.repository
++
++import com.example.apiarymanager.data.local.dao.InspectionDao
++import com.example.apiarymanager.data.mapper.toDomain
++import com.example.apiarymanager.data.mapper.toEntity
++import com.example.apiarymanager.domain.model.Inspection
++import com.example.apiarymanager.domain.repository.InspectionRepository
++import kotlinx.coroutines.flow.Flow
++import kotlinx.coroutines.flow.map
++import javax.inject.Inject
++
++class InspectionRepositoryImpl @Inject constructor(
++    private val dao: InspectionDao
++) : InspectionRepository {
++
++    override fun getInspectionsByHive(hiveId: Long): Flow<List<Inspection>> =
++        dao.getInspectionsByHive(hiveId).map { entities -> entities.map { it.toDomain() } }
++
++    override fun getInspectionById(id: Long): Flow<Inspection?> =
++        dao.getInspectionById(id).map { it?.toDomain() }
++
++    override suspend fun insertInspection(inspection: Inspection): Long =
++        dao.insertInspection(inspection.toEntity())
++
++    override suspend fun updateInspection(inspection: Inspection) =
++        dao.updateInspection(inspection.toEntity())
++
++    override suspend fun deleteInspection(id: Long) =
++        dao.deleteInspection(id)
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/data/repository/TaskRepositoryImpl.kt b/app/src/main/java/com/example/apiarymanager/data/repository/TaskRepositoryImpl.kt
+new file mode 100644
+index 0000000..b21355e
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/data/repository/TaskRepositoryImpl.kt
+@@ -0,0 +1,39 @@
++package com.example.apiarymanager.data.repository
++
++import com.example.apiarymanager.data.local.dao.TaskDao
++import com.example.apiarymanager.data.mapper.toDomain
++import com.example.apiarymanager.data.mapper.toEntity
++import com.example.apiarymanager.domain.model.Task
++import com.example.apiarymanager.domain.repository.TaskRepository
++import kotlinx.coroutines.flow.Flow
++import kotlinx.coroutines.flow.map
++import javax.inject.Inject
++
++class TaskRepositoryImpl @Inject constructor(
++    private val dao: TaskDao
++) : TaskRepository {
++
++    override fun getAllTasks(): Flow<List<Task>> =
++        dao.getAllTasks().map { entities -> entities.map { it.toDomain() } }
++
++    override fun getTasksByApiary(apiaryId: Long): Flow<List<Task>> =
++        dao.getTasksByApiary(apiaryId).map { entities -> entities.map { it.toDomain() } }
++
++    override fun getTasksByHive(hiveId: Long): Flow<List<Task>> =
++        dao.getTasksByHive(hiveId).map { entities -> entities.map { it.toDomain() } }
++
++    override fun getTaskById(id: Long): Flow<Task?> =
++        dao.getTaskById(id).map { it?.toDomain() }
++
++    override suspend fun insertTask(task: Task): Long =
++        dao.insertTask(task.toEntity())
++
++    override suspend fun updateTask(task: Task) =
++        dao.updateTask(task.toEntity())
++
++    override suspend fun deleteTask(id: Long) =
++        dao.deleteTask(id)
++
++    override suspend fun setTaskCompleted(id: Long, completed: Boolean) =
++        dao.setCompleted(id, completed)
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/di/CoroutinesModule.kt b/app/src/main/java/com/example/apiarymanager/di/CoroutinesModule.kt
+new file mode 100644
+index 0000000..8b2f455
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/di/CoroutinesModule.kt
+@@ -0,0 +1,26 @@
++package com.example.apiarymanager.di
++
++import dagger.Module
++import dagger.Provides
++import dagger.hilt.InstallIn
++import dagger.hilt.components.SingletonComponent
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.SupervisorJob
++import javax.inject.Qualifier
++import javax.inject.Singleton
++
++@Qualifier
++@Retention(AnnotationRetention.BINARY)
++annotation class ApplicationScope
++
++@Module
++@InstallIn(SingletonComponent::class)
++object CoroutinesModule {
++
++    @Provides
++    @Singleton
++    @ApplicationScope
++    fun provideApplicationScope(): CoroutineScope =
++        CoroutineScope(SupervisorJob() + Dispatchers.Default)
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/di/DatabaseModule.kt b/app/src/main/java/com/example/apiarymanager/di/DatabaseModule.kt
+new file mode 100644
+index 0000000..6c32bca
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/di/DatabaseModule.kt
+@@ -0,0 +1,64 @@
++package com.example.apiarymanager.di
++
++import android.content.Context
++import androidx.room.Room
++import androidx.sqlite.db.SupportSQLiteDatabase
++import com.example.apiarymanager.data.local.database.ApiaryManagerDatabase
++import com.example.apiarymanager.data.local.dao.ApiaryDao
++import com.example.apiarymanager.data.local.dao.HiveDao
++import com.example.apiarymanager.data.local.dao.InspectionDao
++import com.example.apiarymanager.data.local.dao.TaskDao
++import com.example.apiarymanager.data.local.seeder.DatabaseSeeder
++import dagger.Module
++import dagger.Provides
++import dagger.hilt.InstallIn
++import dagger.hilt.android.qualifiers.ApplicationContext
++import dagger.hilt.components.SingletonComponent
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.launch
++import javax.inject.Singleton
++
++@Module
++@InstallIn(SingletonComponent::class)
++object DatabaseModule {
++
++    @Provides
++    @Singleton
++    fun provideDatabase(
++        @ApplicationContext context: Context,
++        @ApplicationScope appScope: CoroutineScope
++    ): ApiaryManagerDatabase {
++        // lateinit trick: the callback fires on first DB access (not at build() time),
++        // so `database` is guaranteed to be assigned before the lambda runs.
++        lateinit var database: ApiaryManagerDatabase
++
++        database = Room.databaseBuilder(
++            context,
++            ApiaryManagerDatabase::class.java,
++            ApiaryManagerDatabase.DATABASE_NAME
++        )
++            .addCallback(object : androidx.room.RoomDatabase.Callback() {
++                override fun onCreate(db: SupportSQLiteDatabase) {
++                    super.onCreate(db)
++                    appScope.launch {
++                        DatabaseSeeder.seed(database)
++                    }
++                }
++            })
++            .build()
++
++        return database
++    }
++
++    @Provides
++    fun provideApiaryDao(db: ApiaryManagerDatabase): ApiaryDao = db.apiaryDao()
++
++    @Provides
++    fun provideHiveDao(db: ApiaryManagerDatabase): HiveDao = db.hiveDao()
++
++    @Provides
++    fun provideInspectionDao(db: ApiaryManagerDatabase): InspectionDao = db.inspectionDao()
++
++    @Provides
++    fun provideTaskDao(db: ApiaryManagerDatabase): TaskDao = db.taskDao()
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/di/RepositoryModule.kt b/app/src/main/java/com/example/apiarymanager/di/RepositoryModule.kt
+new file mode 100644
+index 0000000..3af5be9
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/di/RepositoryModule.kt
+@@ -0,0 +1,36 @@
++package com.example.apiarymanager.di
++
++import com.example.apiarymanager.data.repository.ApiaryRepositoryImpl
++import com.example.apiarymanager.data.repository.HiveRepositoryImpl
++import com.example.apiarymanager.data.repository.InspectionRepositoryImpl
++import com.example.apiarymanager.data.repository.TaskRepositoryImpl
++import com.example.apiarymanager.domain.repository.ApiaryRepository
++import com.example.apiarymanager.domain.repository.HiveRepository
++import com.example.apiarymanager.domain.repository.InspectionRepository
++import com.example.apiarymanager.domain.repository.TaskRepository
++import dagger.Binds
++import dagger.Module
++import dagger.hilt.InstallIn
++import dagger.hilt.components.SingletonComponent
++import javax.inject.Singleton
++
++@Module
++@InstallIn(SingletonComponent::class)
++abstract class RepositoryModule {
++
++    @Binds
++    @Singleton
++    abstract fun bindApiaryRepository(impl: ApiaryRepositoryImpl): ApiaryRepository
++
++    @Binds
++    @Singleton
++    abstract fun bindHiveRepository(impl: HiveRepositoryImpl): HiveRepository
++
++    @Binds
++    @Singleton
++    abstract fun bindInspectionRepository(impl: InspectionRepositoryImpl): InspectionRepository
++
++    @Binds
++    @Singleton
++    abstract fun bindTaskRepository(impl: TaskRepositoryImpl): TaskRepository
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/domain/model/Apiary.kt b/app/src/main/java/com/example/apiarymanager/domain/model/Apiary.kt
+new file mode 100644
+index 0000000..f58247e
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/domain/model/Apiary.kt
+@@ -0,0 +1,13 @@
++package com.example.apiarymanager.domain.model
++
++import java.time.LocalDate
++
++data class Apiary(
++    val id: Long = 0,
++    val name: String,
++    val location: String,
++    val latitude: Double? = null,
++    val longitude: Double? = null,
++    val notes: String = "",
++    val createdAt: LocalDate = LocalDate.now()
++)
+diff --git a/app/src/main/java/com/example/apiarymanager/domain/model/Hive.kt b/app/src/main/java/com/example/apiarymanager/domain/model/Hive.kt
+new file mode 100644
+index 0000000..5eee6cf
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/domain/model/Hive.kt
+@@ -0,0 +1,28 @@
++package com.example.apiarymanager.domain.model
++
++import java.time.LocalDate
++
++data class Hive(
++    val id: Long = 0,
++    val apiaryId: Long,
++    val number: Int,
++    val name: String,
++    val queenYear: Int? = null,
++    val status: HiveStatus = HiveStatus.ACTIVE,
++    val notes: String = "",
++    val installedAt: LocalDate = LocalDate.now()
++)
++
++enum class HiveStatus {
++    ACTIVE,
++    WEAK,
++    DEAD,
++    SOLD;
++
++    fun displayName(): String = when (this) {
++        ACTIVE -> "Aktywny"
++        WEAK   -> "S┼éaby"
++        DEAD   -> "Martwy"
++        SOLD   -> "Sprzedany"
++    }
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/domain/model/Inspection.kt b/app/src/main/java/com/example/apiarymanager/domain/model/Inspection.kt
+new file mode 100644
+index 0000000..e3caf01
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/domain/model/Inspection.kt
+@@ -0,0 +1,30 @@
++package com.example.apiarymanager.domain.model
++
++import java.time.LocalDate
++
++data class Inspection(
++    val id: Long = 0,
++    val hiveId: Long,
++    val date: LocalDate = LocalDate.now(),
++    val queenSeen: Boolean = false,
++    val broodCondition: BroodCondition = BroodCondition.GOOD,
++    val honeyStoresKg: Float = 0f,
++    val frameCount: Int = 0,
++    val notes: String = ""
++)
++
++enum class BroodCondition {
++    EXCELLENT,
++    GOOD,
++    FAIR,
++    POOR,
++    NONE;
++
++    fun displayName(): String = when (this) {
++        EXCELLENT -> "Doskona┼éy"
++        GOOD      -> "Dobry"
++        FAIR      -> "Przeci─Ötny"
++        POOR      -> "S┼éaby"
++        NONE      -> "Brak"
++    }
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/domain/model/Task.kt b/app/src/main/java/com/example/apiarymanager/domain/model/Task.kt
+new file mode 100644
+index 0000000..1eedf6d
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/domain/model/Task.kt
+@@ -0,0 +1,27 @@
++package com.example.apiarymanager.domain.model
++
++import java.time.LocalDate
++
++data class Task(
++    val id: Long = 0,
++    val apiaryId: Long? = null,
++    val hiveId: Long? = null,
++    val title: String,
++    val description: String = "",
++    val dueDate: LocalDate? = null,
++    val priority: TaskPriority = TaskPriority.MEDIUM,
++    val isCompleted: Boolean = false,
++    val createdAt: LocalDate = LocalDate.now()
++)
++
++enum class TaskPriority {
++    LOW,
++    MEDIUM,
++    HIGH;
++
++    fun displayName(): String = when (this) {
++        LOW    -> "Niski"
++        MEDIUM -> "┼Üredni"
++        HIGH   -> "Wysoki"
++    }
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/domain/repository/ApiaryRepository.kt b/app/src/main/java/com/example/apiarymanager/domain/repository/ApiaryRepository.kt
+new file mode 100644
+index 0000000..35a6aa9
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/domain/repository/ApiaryRepository.kt
+@@ -0,0 +1,12 @@
++package com.example.apiarymanager.domain.repository
++
++import com.example.apiarymanager.domain.model.Apiary
++import kotlinx.coroutines.flow.Flow
++
++interface ApiaryRepository {
++    fun getAllApiaries(): Flow<List<Apiary>>
++    fun getApiaryById(id: Long): Flow<Apiary?>
++    suspend fun insertApiary(apiary: Apiary): Long
++    suspend fun updateApiary(apiary: Apiary)
++    suspend fun deleteApiary(id: Long)
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/domain/repository/HiveRepository.kt b/app/src/main/java/com/example/apiarymanager/domain/repository/HiveRepository.kt
+new file mode 100644
+index 0000000..d313615
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/domain/repository/HiveRepository.kt
+@@ -0,0 +1,12 @@
++package com.example.apiarymanager.domain.repository
++
++import com.example.apiarymanager.domain.model.Hive
++import kotlinx.coroutines.flow.Flow
++
++interface HiveRepository {
++    fun getHivesByApiary(apiaryId: Long): Flow<List<Hive>>
++    fun getHiveById(id: Long): Flow<Hive?>
++    suspend fun insertHive(hive: Hive): Long
++    suspend fun updateHive(hive: Hive)
++    suspend fun deleteHive(id: Long)
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/domain/repository/InspectionRepository.kt b/app/src/main/java/com/example/apiarymanager/domain/repository/InspectionRepository.kt
+new file mode 100644
+index 0000000..b6e80d7
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/domain/repository/InspectionRepository.kt
+@@ -0,0 +1,12 @@
++package com.example.apiarymanager.domain.repository
++
++import com.example.apiarymanager.domain.model.Inspection
++import kotlinx.coroutines.flow.Flow
++
++interface InspectionRepository {
++    fun getInspectionsByHive(hiveId: Long): Flow<List<Inspection>>
++    fun getInspectionById(id: Long): Flow<Inspection?>
++    suspend fun insertInspection(inspection: Inspection): Long
++    suspend fun updateInspection(inspection: Inspection)
++    suspend fun deleteInspection(id: Long)
++}
+diff --git a/app/src/main/java/com/example/apiarymanager/domain/repository/TaskRepository.kt b/app/src/main/java/com/example/apiarymanager/domain/repository/TaskRepository.kt
+new file mode 100644
+index 0000000..cd1042c
+--- /dev/null
++++ b/app/src/main/java/com/example/apiarymanager/domain/repository/TaskRepository.kt
+@@ -0,0 +1,15 @@
++package com.example.apiarymanager.domain.repository
++
++import com.example.apiarymanager.domain.model.Task
++import kotlinx.coroutines.flow.Flow
++
++interface TaskRepository {
++    fun getAllTasks(): Flow<List<Task>>
++    fun getTasksByApiary(apiaryId: Long): Flow<List<Task>>
++    fun getTasksByHive(hiveId: Long): Flow<List<Task>>
++    fun getTaskById(id: Long): Flow<Task?>
++    suspend fun insertTask(task: Task): Long
++    suspend fun updateTask(task: Task)
++    suspend fun deleteTask(id: Long)
++    suspend fun setTaskCompleted(id: Long, completed: Boolean)
++}
