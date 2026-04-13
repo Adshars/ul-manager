@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.navigation.compose.rememberNavController
+import com.example.apiarymanager.presentation.navigation.AppNavGraph
 import com.example.apiarymanager.presentation.theme.ApiaryManagerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -14,7 +16,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ApiaryManagerTheme {
-                // Navigation host will be wired here in Etap 2
+                val navController = rememberNavController()
+                AppNavGraph(navController = navController)
             }
         }
     }
