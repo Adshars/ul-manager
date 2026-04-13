@@ -77,7 +77,7 @@ fun DashboardScreen(
     onNavigateToHiveList: (apiaryId: Long) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle(DashboardUiState())
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {

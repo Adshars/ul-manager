@@ -72,25 +72,70 @@ object DatabaseSeeder {
     private suspend fun seedInspections(db: ApiaryManagerDatabase) {
         val inspections = listOf(
             // Ul Alfa
-            InspectionDto(1,  1, "2024-04-10", true,  "EXCELLENT", 4.5f, 10, "Matka aktywna, piękny czerw."),
-            InspectionDto(2,  1, "2024-05-15", true,  "GOOD",      8.2f, 12, "Gotowe do odbierania miodu."),
+            InspectionDto(1,  1, "2024-04-10", queenSeen = true,  broodSeen = true,
+                broodCondition = "EXCELLENT", colonyStrength = "STRONG",
+                honeyStoresKg = 4.5f, frameCount = 10,
+                superboxesAdded = 1, dryCombFrames = 2,
+                notes = "Matka aktywna, piękny czerw."),
+            InspectionDto(2,  1, "2024-05-15", queenSeen = true,  broodSeen = true,
+                broodCondition = "GOOD", colonyStrength = "VERY_STRONG",
+                honeyStoresKg = 8.2f, frameCount = 12,
+                superboxesAdded = 2,
+                notes = "Gotowe do odbierania miodu."),
             // Ul Beta
-            InspectionDto(3,  2, "2024-04-10", true,  "EXCELLENT", 5.0f, 11, "Wzorcowa rodzina."),
-            InspectionDto(4,  2, "2024-05-15", true,  "EXCELLENT", 9.5f, 12, "Odebrano 4 kg miodu."),
+            InspectionDto(3,  2, "2024-04-10", queenSeen = true,  broodSeen = true,
+                broodCondition = "EXCELLENT", colonyStrength = "STRONG",
+                honeyStoresKg = 5.0f, frameCount = 11,
+                notes = "Wzorcowa rodzina."),
+            InspectionDto(4,  2, "2024-05-15", queenSeen = true,  broodSeen = true,
+                broodCondition = "EXCELLENT", colonyStrength = "VERY_STRONG",
+                honeyStoresKg = 9.5f, frameCount = 12,
+                superboxesRemoved = 1,
+                notes = "Odebrano 4 kg miodu."),
             // Ul Gamma
-            InspectionDto(5,  3, "2024-04-12", false, "POOR",      1.2f,  7, "Matki nie widać. Dokarmianie syropem."),
-            InspectionDto(6,  3, "2024-05-16", true,  "FAIR",      2.5f,  8, "Matka odnaleziona po tygodniu."),
+            InspectionDto(5,  3, "2024-04-12", queenSeen = false, broodSeen = false,
+                broodCondition = "POOR", colonyStrength = "CRITICAL",
+                honeyStoresKg = 1.2f, frameCount = 7,
+                problems = "Matki nie widać. Możliwa osierociałość.",
+                notes = "Dokarmianie syropem."),
+            InspectionDto(6,  3, "2024-05-16", queenSeen = true,  broodSeen = true,
+                broodCondition = "FAIR", colonyStrength = "WEAK",
+                honeyStoresKg = 2.5f, frameCount = 8,
+                foundationFrames = 2,
+                notes = "Matka odnaleziona po tygodniu."),
             // Ul Delta
-            InspectionDto(7,  4, "2024-06-05", true,  "GOOD",      1.0f,  6, "Nowy rój dobrze przyjął ul."),
+            InspectionDto(7,  4, "2024-06-05", queenSeen = true,  broodSeen = true,
+                broodCondition = "GOOD", colonyStrength = "NORMAL",
+                honeyStoresKg = 1.0f, frameCount = 6,
+                foundationFrames = 3,
+                notes = "Nowy rój dobrze przyjął ul."),
             // Ul Omega
-            InspectionDto(8,  5, "2024-04-11", true,  "GOOD",      3.8f,  9, "Spokojne pszczoły."),
-            InspectionDto(9,  5, "2024-05-20", true,  "EXCELLENT", 7.0f, 11, "Bardzo dobry sezon."),
+            InspectionDto(8,  5, "2024-04-11", queenSeen = true,  broodSeen = true,
+                broodCondition = "GOOD", colonyStrength = "NORMAL",
+                honeyStoresKg = 3.8f, frameCount = 9,
+                notes = "Spokojne pszczoły."),
+            InspectionDto(9,  5, "2024-05-20", queenSeen = true,  broodSeen = true,
+                broodCondition = "EXCELLENT", colonyStrength = "STRONG",
+                honeyStoresKg = 7.0f, frameCount = 11,
+                superboxesAdded = 1,
+                notes = "Bardzo dobry sezon."),
             // Ul Sigma
-            InspectionDto(10, 6, "2024-04-11", true,  "GOOD",      4.0f, 10, "Normalna aktywność."),
+            InspectionDto(10, 6, "2024-04-11", queenSeen = true,  broodSeen = true,
+                broodCondition = "GOOD", colonyStrength = "NORMAL",
+                honeyStoresKg = 4.0f, frameCount = 10,
+                notes = "Normalna aktywność."),
             // Ul Theta
-            InspectionDto(11, 7, "2024-04-12", true,  "FAIR",      2.0f,  8, "Matka 3-letnia. Planowana wymiana."),
+            InspectionDto(11, 7, "2024-04-12", queenSeen = true,  broodSeen = true,
+                broodCondition = "FAIR", colonyStrength = "WEAK",
+                honeyStoresKg = 2.0f, frameCount = 8,
+                problems = "Matka 3-letnia, obniżona wydajność.",
+                notes = "Planowana wymiana matki w czerwcu."),
             // Ul Lambda — ostatni przegląd przed upadkiem
-            InspectionDto(12, 8, "2023-10-20", true,  "POOR",      0.5f,  5, "Rodzina słaba wchodząca w zimę.")
+            InspectionDto(12, 8, "2023-10-20", queenSeen = true,  broodSeen = false,
+                broodCondition = "POOR", colonyStrength = "CRITICAL",
+                honeyStoresKg = 0.5f, frameCount = 5,
+                problems = "Brak czerwiu. Rodzina słaba wchodząca w zimę.",
+                notes = "Konieczne dokarmianie ciasto cukrowym.")
         )
         db.inspectionDao().insertAll(inspections.map { it.toEntity() })
     }

@@ -18,7 +18,7 @@ import com.example.apiarymanager.data.local.entity.TaskEntity
         InspectionEntity::class,
         TaskEntity::class
     ],
-    version = 1,
+    version = 2,   // bumped: added colony_strength, brood_seen, queen_cells_seen, frame management columns
     exportSchema = false
 )
 abstract class ApiaryManagerDatabase : RoomDatabase() {
