@@ -185,7 +185,7 @@ private fun DashboardContent(
         if (uiState.apiaries.isEmpty()) {
             item { EmptyState(message = "Brak pasiek. Dodaj pierwszą pasiekę.") }
         } else {
-            items(items = uiState.apiaries, key = { it.apiary.id }) { dashApiary ->
+            items(items = uiState.apiaries, key = { "apiary_${it.apiary.id}" }) { dashApiary ->
                 ApiaryCard(
                     dashApiary = dashApiary,
                     onClick    = { onApiaryClick(dashApiary.apiary.id) },
@@ -205,7 +205,7 @@ private fun DashboardContent(
         if (uiState.pendingTasks.isEmpty()) {
             item { EmptyState(message = "Brak zaległych zadań. Dobra robota!") }
         } else {
-            items(items = uiState.pendingTasks, key = { it.id }) { task ->
+            items(items = uiState.pendingTasks, key = { "task_${it.id}" }) { task ->
                 TaskItem(
                     task           = task,
                     onCheckedChange = { onTaskCheckedChange(task.id, it) },
