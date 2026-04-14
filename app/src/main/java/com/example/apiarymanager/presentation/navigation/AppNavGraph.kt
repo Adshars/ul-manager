@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.example.apiarymanager.presentation.dashboard.DashboardScreen
 import com.example.apiarymanager.presentation.hive.detail.HiveDetailScreen
 import com.example.apiarymanager.presentation.hive.list.HiveListScreen
