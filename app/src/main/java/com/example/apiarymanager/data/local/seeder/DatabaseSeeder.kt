@@ -6,6 +6,7 @@ import com.example.apiarymanager.data.dto.InspectionDto
 import com.example.apiarymanager.data.dto.TaskDto
 import com.example.apiarymanager.data.local.database.ApiaryManagerDatabase
 import com.example.apiarymanager.data.mapper.toEntity
+import java.time.LocalDate
 
 /**
  * Seeds the database with mock data on first install.
@@ -143,14 +144,35 @@ object DatabaseSeeder {
     // ─── Tasks ───────────────────────────────────────────────────────────────
 
     private suspend fun seedTasks(db: ApiaryManagerDatabase) {
+        val today    = LocalDate.now()
+        val created  = today.minusDays(14).toString()
+
+        // 3 tasks are overdue/today → shown on dashboard as pending
+        // remaining tasks are future → not shown until their due date
         val tasks = listOf(
-            TaskDto(1, 1,    null, "Odbiór miodu — Pasieka Leśna",      "Zebrać plastry z uli Beta i Alfa.",   "2024-06-10", "HIGH",   false, "2024-05-20"),
-            TaskDto(2, null, 3,    "Wymiana matki — ul Gamma",           "Zamówić unasienioną matkę z hodowli.","2024-06-01", "HIGH",   false, "2024-05-16"),
-            TaskDto(3, null, 7,    "Wymiana matki — ul Theta",           "Stara matka, obniżona produkcja.",    "2024-06-15", "MEDIUM", false, "2024-05-20"),
-            TaskDto(4, 2,    null, "Kontrola zimowli — Pasieka Ogrodowa","Sprawdzić zapasy przed zimą.",        "2024-10-01", "MEDIUM", false, "2024-05-20"),
-            TaskDto(5, 1,    null, "Leczenie warrozy — Pasieka Leśna",   "Zastosować Apivar po zbiorach.",      "2024-08-01", "HIGH",   false, "2024-05-20"),
-            TaskDto(6, null, 4,    "Obserwacja roju Delta",              "Sprawdzić przyjęcie się roju.",       "2024-06-12", "LOW",    true,  "2024-06-05"),
-            TaskDto(7, 1,    null, "Malowanie uli",                      "Odświeżyć powłokę 3 uli w pasiece.", "2024-09-01", "LOW",    false, "2024-05-01")
+            TaskDto(1, null, 3, "Wymiana matki — ul Gamma",
+                "Zamówić unasienioną matkę z hodowli apiarskiej.",
+                today.minusDays(2).toString(), "HIGH",   false, created),
+            TaskDto(2, null, 7, "Wymiana matki — ul Theta",
+                "Stara matka, obniżona produkcja — wymiana pilna.",
+                today.minusDays(1).toString(), "HIGH",   false, created),
+            TaskDto(3, 1, null, "Odbiór miodu — Pasieka Leśna",
+                "Zebrać plastry z uli Beta i Alfa.",
+                today.toString(),              "MEDIUM", false, created),
+
+            // Future tasks — won't appear on dashboard yet
+            TaskDto(4, 1, null, "Leczenie warrozy — Pasieka Leśna",
+                "Zastosować Apivar po zbiorach.",
+                today.plusDays(30).toString(), "HIGH",   false, created),
+            TaskDto(5, 2, null, "Kontrola zimowli — Pasieka Ogrodowa",
+                "Sprawdzić zapasy przed zimą.",
+                today.plusDays(60).toString(), "MEDIUM", false, created),
+            TaskDto(6, null, 4, "Obserwacja roju Delta",
+                "Sprawdzić przyjęcie się roju.",
+                today.plusDays(5).toString(),  "LOW",    false, created),
+            TaskDto(7, 1, null, "Malowanie uli",
+                "Odświeżyć powłokę 3 uli w pasiece.",
+                today.plusDays(90).toString(), "LOW",    false, created)
         )
         db.taskDao().insertAll(tasks.map { it.toEntity() })
     }

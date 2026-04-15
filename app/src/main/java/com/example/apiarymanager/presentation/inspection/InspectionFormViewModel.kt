@@ -1,11 +1,16 @@
 package com.example.apiarymanager.presentation.inspection
 
+import android.graphics.Bitmap
+import android.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.apiarymanager.domain.model.ColonyStrength
 import com.example.apiarymanager.domain.repository.InspectionRepository
 import com.example.apiarymanager.domain.usecase.SaveInspectionUseCase
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.MultiFormatWriter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +44,15 @@ class InspectionFormViewModel @Inject constructor(
 
     init {
         if (inspectionId != null) loadExistingInspection(inspectionId)
+        // Pick up photo path returned from CameraScreen via SavedStateHandle
+        viewModelScope.launch {
+            savedStateHandle.getStateFlow<String?>("capturedPhotoPath", null).collect { path ->
+                if (!path.isNullOrBlank()) {
+                    onPhotoAdded(path)
+                    savedStateHandle.remove<String>("capturedPhotoPath")
+                }
+            }
+        }
     }
 
     // ─── Load for edit ────────────────────────────────────────────────────────
@@ -86,6 +100,50 @@ class InspectionFormViewModel @Inject constructor(
     fun onProblemsChange(value: String) = _uiState.update { it.copy(problems = value) }
 
     fun onNotesChange(value: String) = _uiState.update { it.copy(notes = value) }
+
+    // ─── Photos ───────────────────────────────────────────────────────────────
+
+    fun onPhotoAdded(path: String) {
+        _uiState.update { it.copy(photoPaths = it.photoPaths + path) }
+    }
+
+    fun onPhotoRemoved(path: String) {
+        _uiState.update { it.copy(photoPaths = it.photoPaths - path) }
+    }
+
+    fun onPhotosFromGallery(uris: List<android.net.Uri>) {
+        _uiState.update { it.copy(photoPaths = it.photoPaths + uris.map { uri -> uri.toString() }) }
+    }
+
+    // ─── QR code ──────────────────────────────────────────────────────────────
+
+    fun onGenerateQrClick() {
+        viewModelScope.launch {
+            runCatching {
+                generateQrBitmap("hive:${hiveId}", 512)
+            }.onSuccess { bitmap ->
+                _uiState.update { it.copy(showQrDialog = true, qrBitmap = bitmap) }
+            }.onFailure { e ->
+                _events.send(InspectionFormEvent.ShowMessage("Błąd generowania QR: ${e.message}"))
+            }
+        }
+    }
+
+    fun onDismissQrDialog() {
+        _uiState.update { it.copy(showQrDialog = false) }
+    }
+
+    private fun generateQrBitmap(content: String, size: Int): Bitmap {
+        val hints = mapOf(EncodeHintType.MARGIN to 1)
+        val matrix = MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, size, size, hints)
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565)
+        for (x in 0 until size) {
+            for (y in 0 until size) {
+                bitmap.setPixel(x, y, if (matrix[x, y]) Color.BLACK else Color.WHITE)
+            }
+        }
+        return bitmap
+    }
 
     // ─── Save ─────────────────────────────────────────────────────────────────
 

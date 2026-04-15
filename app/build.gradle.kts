@@ -80,6 +80,26 @@ dependencies {
     // Serialization (required for @Serializable routes in Navigation Compose 2.8)
     implementation(libs.kotlinx.serialization.json)
 
+    // Vico charts
+    implementation(libs.vico.compose.m3)
+
+    // CameraX
+    implementation(libs.camerax.camera2)
+    implementation(libs.camerax.lifecycle)
+    implementation(libs.camerax.view)
+
+    // Coil
+    implementation(libs.coil.compose)
+
+    // ZXing
+    implementation(libs.zxing.core)
+
+    // Biometric
+    implementation(libs.biometric)
+
+    // Security crypto
+    implementation(libs.security.crypto)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -72,5 +72,9 @@ data class InspectionEntity(
     val problems: String,
 
     @ColumnInfo(name = "notes")
-    val notes: String
+    val notes: String,
+
+    /** Comma-separated absolute file paths of inspection photos */
+    @ColumnInfo(name = "photo_paths", defaultValue = "")
+    val photoPaths: String = ""
 )

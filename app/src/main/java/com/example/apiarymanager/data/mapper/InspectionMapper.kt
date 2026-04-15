@@ -46,7 +46,8 @@ fun InspectionEntity.toDomain(): Inspection = Inspection(
     dryCombFrames    = dryCombFrames,
     foundationFrames = foundationFrames,
     problems         = problems,
-    notes            = notes
+    notes            = notes,
+    photoPaths       = if (photoPaths.isBlank()) emptyList() else photoPaths.split(",")
 )
 
 // ─── Domain → Entity ─────────────────────────────────────────────────────────
@@ -67,5 +68,6 @@ fun Inspection.toEntity(): InspectionEntity = InspectionEntity(
     dryCombFrames    = dryCombFrames,
     foundationFrames = foundationFrames,
     problems         = problems,
-    notes            = notes
+    notes            = notes,
+    photoPaths       = photoPaths.joinToString(",")
 )

@@ -22,25 +22,31 @@ fun HiveDto.toEntity(): HiveEntity = HiveEntity(
 // ─── Entity → Domain ─────────────────────────────────────────────────────────
 
 fun HiveEntity.toDomain(): Hive = Hive(
-    id          = id,
-    apiaryId    = apiaryId,
-    number      = number,
-    name        = name,
-    queenYear   = queenYear,
-    status      = HiveStatus.valueOf(status),
-    notes       = notes,
-    installedAt = LocalDate.ofEpochDay(installedAt)
+    id            = id,
+    apiaryId      = apiaryId,
+    number        = number,
+    name          = name,
+    queenYear     = queenYear,
+    status        = HiveStatus.valueOf(status),
+    frameType     = frameType,
+    superboxCount = superboxCount,
+    queenOrigin   = queenOrigin,
+    notes         = notes,
+    installedAt   = LocalDate.ofEpochDay(installedAt)
 )
 
 // ─── Domain → Entity ─────────────────────────────────────────────────────────
 
 fun Hive.toEntity(): HiveEntity = HiveEntity(
-    id          = id,
-    apiaryId    = apiaryId,
-    number      = number,
-    name        = name,
-    queenYear   = queenYear,
-    status      = status.name,
-    notes       = notes,
-    installedAt = installedAt.toEpochDay()
+    id            = id,
+    apiaryId      = apiaryId,
+    number        = number,
+    name          = name,
+    queenYear     = queenYear,
+    status        = status.name,
+    frameType     = frameType,
+    superboxCount = superboxCount,
+    queenOrigin   = queenOrigin,
+    notes         = notes,
+    installedAt   = installedAt.toEpochDay()
 )

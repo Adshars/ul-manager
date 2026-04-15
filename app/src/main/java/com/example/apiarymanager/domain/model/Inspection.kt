@@ -22,7 +22,9 @@ data class Inspection(
     val foundationFrames: Int = 0,
     // Free text
     val problems: String = "",
-    val notes: String = ""
+    val notes: String = "",
+    // Photos — list of absolute file paths stored on device
+    val photoPaths: List<String> = emptyList()
 )
 
 enum class ColonyStrength {

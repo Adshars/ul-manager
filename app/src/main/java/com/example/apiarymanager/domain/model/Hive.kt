@@ -9,6 +9,9 @@ data class Hive(
     val name: String,
     val queenYear: Int? = null,
     val status: HiveStatus = HiveStatus.ACTIVE,
+    val frameType: String = "Langstroth",
+    val superboxCount: Int = 0,
+    val queenOrigin: String = "",
     val notes: String = "",
     val installedAt: LocalDate = LocalDate.now()
 )

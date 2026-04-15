@@ -38,6 +38,15 @@ data class HiveEntity(
     @ColumnInfo(name = "status")
     val status: String,
 
+    @ColumnInfo(name = "frame_type", defaultValue = "Langstroth")
+    val frameType: String = "Langstroth",
+
+    @ColumnInfo(name = "superbox_count", defaultValue = "0")
+    val superboxCount: Int = 0,
+
+    @ColumnInfo(name = "queen_origin", defaultValue = "")
+    val queenOrigin: String = "",
+
     @ColumnInfo(name = "notes")
     val notes: String,
 

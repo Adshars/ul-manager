@@ -4,10 +4,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.apiarymanager.presentation.navigation.AppDrawerContent
 import com.example.apiarymanager.presentation.navigation.AppNavGraph
 import com.example.apiarymanager.presentation.theme.ApiaryManagerTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -16,8 +24,32 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ApiaryManagerTheme {
-                val navController = rememberNavController()
-                AppNavGraph(navController = navController)
+                val navController  = rememberNavController()
+                val drawerState    = rememberDrawerState(DrawerValue.Closed)
+                val scope          = rememberCoroutineScope()
+                val currentBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = currentBackStackEntry?.destination?.route
+
+                ModalNavigationDrawer(
+                    drawerState   = drawerState,
+                    drawerContent = {
+                        AppDrawerContent(
+                            currentRoute = currentRoute,
+                            onNavigate   = { route ->
+                                scope.launch { drawerState.close() }
+                                navController.navigate(route) {
+                                    launchSingleTop = true
+                                    restoreState    = true
+                                }
+                            }
+                        )
+                    }
+                ) {
+                    AppNavGraph(
+                        navController = navController,
+                        onOpenDrawer  = { scope.launch { drawerState.open() } }
+                    )
+                }
             }
         }
     }

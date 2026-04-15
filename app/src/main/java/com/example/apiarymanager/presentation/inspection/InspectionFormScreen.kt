@@ -1,17 +1,28 @@
 package com.example.apiarymanager.presentation.inspection
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Environment
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,10 +36,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,12 +74,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.example.apiarymanager.domain.model.ColonyStrength
 import com.example.apiarymanager.presentation.theme.ApiaryManagerTheme
 import java.time.Instant
@@ -79,6 +101,7 @@ fun InspectionFormScreen(
     hiveId: Long,
     inspectionId: Long?,
     onNavigateBack: () -> Unit,
+    onNavigateToCamera: (outputDir: String) -> Unit = {},
     viewModel: InspectionFormViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -109,9 +132,10 @@ fun InspectionFormScreen(
             ) { CircularProgressIndicator() }
         } else {
             InspectionFormContent(
-                uiState  = uiState,
-                viewModel = viewModel,
-                modifier = Modifier.padding(innerPadding)
+                uiState           = uiState,
+                viewModel         = viewModel,
+                onNavigateToCamera = onNavigateToCamera,
+                modifier          = Modifier.padding(innerPadding)
             )
         }
     }
@@ -141,8 +165,49 @@ private fun InspectionFormTopBar(
 private fun InspectionFormContent(
     uiState: InspectionFormUiState,
     viewModel: InspectionFormViewModel,
+    onNavigateToCamera: (outputDir: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
+    // Gallery launcher
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia()
+    ) { uris: List<Uri> -> viewModel.onPhotosFromGallery(uris) }
+
+    // Camera permission launcher — navigates to CameraScreen once granted
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath
+                ?: context.cacheDir.absolutePath
+            onNavigateToCamera(dir)
+        }
+    }
+
+    // QR dialog
+    if (uiState.showQrDialog) {
+        uiState.qrBitmap?.let { bitmap ->
+            AlertDialog(
+                onDismissRequest = viewModel::onDismissQrDialog,
+                title = { Text("QR kod ula") },
+                text = {
+                    Image(
+                        bitmap      = bitmap.asImageBitmap(),
+                        contentDescription = "QR kod ula",
+                        modifier    = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = viewModel::onDismissQrDialog) { Text("Zamknij") }
+                }
+            )
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -211,6 +276,116 @@ private fun InspectionFormContent(
                 minLines    = 3,
                 modifier    = Modifier.fillMaxWidth()
             )
+        }
+
+        // ── 7. Photos ─────────────────────────────────────────────────────────
+        FormSection(title = "Zdjęcia") {
+            // Action buttons row
+            Row(
+                modifier              = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilledTonalButton(
+                    onClick  = {
+                        val hasPerm = ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.CAMERA
+                        ) == PackageManager.PERMISSION_GRANTED
+                        if (hasPerm) {
+                            val dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath
+                                ?: context.cacheDir.absolutePath
+                            onNavigateToCamera(dir)
+                        } else {
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Filled.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Aparat")
+                }
+                FilledTonalButton(
+                    onClick  = {
+                        galleryLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Filled.PhotoLibrary, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Galeria")
+                }
+            }
+
+            // Thumbnails
+            if (uiState.photoPaths.isNotEmpty()) {
+                Spacer(Modifier.height(12.dp))
+                Row(
+                    modifier              = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    uiState.photoPaths.forEach { path ->
+                        Box(modifier = Modifier.size(90.dp)) {
+                            AsyncImage(
+                                model             = path,
+                                contentDescription = "Zdjęcie",
+                                contentScale      = ContentScale.Crop,
+                                modifier          = Modifier
+                                    .fillMaxSize()
+                                    .aspectRatio(1f)
+                            )
+                            // Delete button overlay
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .size(24.dp)
+                                    .background(
+                                        Color.Black.copy(alpha = 0.55f),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(50)
+                                    )
+                                    .clickable { viewModel.onPhotoRemoved(path) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector        = Icons.Filled.Close,
+                                    contentDescription = "Usuń zdjęcie",
+                                    tint               = Color.White,
+                                    modifier           = Modifier.size(14.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── 8. QR code ────────────────────────────────────────────────────────
+        FormSection(title = "Kod QR") {
+            Row(
+                modifier          = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text  = "Generuj kod QR ula",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text  = "Wydrukuj i przyczep do ula",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                FilledTonalButton(onClick = viewModel::onGenerateQrClick) {
+                    Icon(Icons.Filled.QrCode, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Generuj")
+                }
+            }
         }
 
         // ── Save button ───────────────────────────────────────────────────────

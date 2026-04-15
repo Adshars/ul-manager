@@ -5,9 +5,12 @@ import androidx.room.Room
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.apiarymanager.data.local.database.ApiaryManagerDatabase
 import com.example.apiarymanager.data.local.dao.ApiaryDao
+import com.example.apiarymanager.data.local.dao.FeedingDao
 import com.example.apiarymanager.data.local.dao.HiveDao
+import com.example.apiarymanager.data.local.dao.HoneyHarvestDao
 import com.example.apiarymanager.data.local.dao.InspectionDao
 import com.example.apiarymanager.data.local.dao.TaskDao
+import com.example.apiarymanager.data.local.dao.TreatmentDao
 import com.example.apiarymanager.data.local.seeder.DatabaseSeeder
 import dagger.Module
 import dagger.Provides
@@ -43,9 +46,11 @@ object DatabaseModule {
             .addCallback(object : androidx.room.RoomDatabase.Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     super.onCreate(db)
-                    appScope.launch {
-                        DatabaseSeeder.seed(database)
-                    }
+                    appScope.launch { DatabaseSeeder.seed(database) }
+                }
+                override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
+                    super.onDestructiveMigration(db)
+                    appScope.launch { DatabaseSeeder.seed(database) }
                 }
             })
             .build()
@@ -64,4 +69,13 @@ object DatabaseModule {
 
     @Provides
     fun provideTaskDao(db: ApiaryManagerDatabase): TaskDao = db.taskDao()
+
+    @Provides
+    fun provideHoneyHarvestDao(db: ApiaryManagerDatabase): HoneyHarvestDao = db.honeyHarvestDao()
+
+    @Provides
+    fun provideTreatmentDao(db: ApiaryManagerDatabase): TreatmentDao = db.treatmentDao()
+
+    @Provides
+    fun provideFeedingDao(db: ApiaryManagerDatabase): FeedingDao = db.feedingDao()
 }

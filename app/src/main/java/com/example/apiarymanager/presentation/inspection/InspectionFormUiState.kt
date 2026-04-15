@@ -25,6 +25,11 @@ data class InspectionFormUiState(
     // Free text
     val problems: String = "",
     val notes: String = "",
+    // Photos
+    val photoPaths: List<String> = emptyList(),
+    // QR code dialog
+    val showQrDialog: Boolean = false,
+    val qrBitmap: android.graphics.Bitmap? = null,
     // Screen state
     val isLoading: Boolean = false,
     val isSaving: Boolean = false
@@ -51,7 +56,8 @@ fun InspectionFormUiState.toInspection(): Inspection = Inspection(
     dryCombFrames    = if (framesManagementEnabled) dryCombFrames    else 0,
     foundationFrames = if (framesManagementEnabled) foundationFrames else 0,
     problems         = problems.trim(),
-    notes            = notes.trim()
+    notes            = notes.trim(),
+    photoPaths       = photoPaths
 )
 
 fun Inspection.toFormState(): InspectionFormUiState = InspectionFormUiState(
@@ -69,5 +75,6 @@ fun Inspection.toFormState(): InspectionFormUiState = InspectionFormUiState(
     dryCombFrames    = dryCombFrames,
     foundationFrames = foundationFrames,
     problems         = problems,
-    notes            = notes
+    notes            = notes,
+    photoPaths       = photoPaths
 )

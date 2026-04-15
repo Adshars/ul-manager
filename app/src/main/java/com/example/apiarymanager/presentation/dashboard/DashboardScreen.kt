@@ -20,7 +20,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Hive
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.ContentPaste
@@ -30,6 +32,7 @@ import androidx.compose.material.icons.outlined.PlaylistAdd
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -75,6 +78,8 @@ import java.util.Locale
 @Composable
 fun DashboardScreen(
     onNavigateToHiveList: (apiaryId: Long) -> Unit,
+    onNavigateToApiaryForm: () -> Unit = {},
+    onOpenDrawer: () -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -90,7 +95,12 @@ fun DashboardScreen(
     }
 
     Scaffold(
-        topBar = { DashboardTopBar() },
+        topBar = { DashboardTopBar(onOpenDrawer = onOpenDrawer) },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onNavigateToApiaryForm) {
+                Icon(Icons.Filled.Add, contentDescription = "Dodaj pasiekę")
+            }
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         if (uiState.isLoading) {
@@ -118,8 +128,13 @@ fun DashboardScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DashboardTopBar() {
+private fun DashboardTopBar(onOpenDrawer: () -> Unit = {}) {
     TopAppBar(
+        navigationIcon = {
+            IconButton(onClick = onOpenDrawer) {
+                Icon(Icons.Filled.Menu, contentDescription = "Menu")
+            }
+        },
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
