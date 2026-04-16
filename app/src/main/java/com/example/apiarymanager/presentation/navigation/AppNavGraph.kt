@@ -16,6 +16,7 @@ import com.example.apiarymanager.presentation.harvest.HarvestFormScreen
 import com.example.apiarymanager.presentation.hive.detail.HiveDetailScreen
 import com.example.apiarymanager.presentation.hive.form.HiveFormScreen
 import com.example.apiarymanager.presentation.hive.list.HiveListScreen
+import com.example.apiarymanager.presentation.hive.qr.HiveQrScreen
 import com.example.apiarymanager.presentation.inspection.InspectionFormScreen
 import com.example.apiarymanager.presentation.login.LoginScreen
 import com.example.apiarymanager.presentation.onboarding.OnboardingCarouselScreen
@@ -192,6 +193,9 @@ fun AppNavGraph(
                 onNavigateToHiveForm = { apiaryId, hiveId ->
                     navController.navigate(HiveFormRoute(apiaryId, hiveId))
                 },
+                onNavigateToHiveQr = { hiveId ->
+                    navController.navigate(HiveQrRoute(hiveId))
+                },
                 onNavigateToInspectionForm = { hiveId, inspectionId ->
                     navController.navigate(InspectionFormRoute(hiveId, inspectionId))
                 },
@@ -207,6 +211,14 @@ fun AppNavGraph(
                 onNavigateToTaskForm = { hiveId, taskId ->
                     navController.navigate(TaskFormRoute(hiveId = hiveId, taskId = taskId))
                 }
+            )
+        }
+
+        // ─── Hive QR ─────────────────────────────────────────────────────────
+
+        composable<HiveQrRoute> {
+            HiveQrScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

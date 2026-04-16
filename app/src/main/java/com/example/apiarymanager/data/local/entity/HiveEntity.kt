@@ -52,5 +52,8 @@ data class HiveEntity(
 
     /** Stored as epoch day */
     @ColumnInfo(name = "installed_at")
-    val installedAt: Long
+    val installedAt: Long,
+
+    @ColumnInfo(name = "qr_code", defaultValue = "")
+    val qrCode: String = ""
 )

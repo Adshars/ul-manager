@@ -14,7 +14,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,9 +38,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
@@ -74,7 +71,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -183,28 +179,6 @@ private fun InspectionFormContent(
             val dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath
                 ?: context.cacheDir.absolutePath
             onNavigateToCamera(dir)
-        }
-    }
-
-    // QR dialog
-    if (uiState.showQrDialog) {
-        uiState.qrBitmap?.let { bitmap ->
-            AlertDialog(
-                onDismissRequest = viewModel::onDismissQrDialog,
-                title = { Text("QR kod ula") },
-                text = {
-                    Image(
-                        bitmap      = bitmap.asImageBitmap(),
-                        contentDescription = "QR kod ula",
-                        modifier    = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                    )
-                },
-                confirmButton = {
-                    TextButton(onClick = viewModel::onDismissQrDialog) { Text("Zamknij") }
-                }
-            )
         }
     }
 
@@ -358,32 +332,6 @@ private fun InspectionFormContent(
                             }
                         }
                     }
-                }
-            }
-        }
-
-        // ── 8. QR code ────────────────────────────────────────────────────────
-        FormSection(title = "Kod QR") {
-            Row(
-                modifier          = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text  = "Generuj kod QR ula",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        text  = "Wydrukuj i przyczep do ula",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                FilledTonalButton(onClick = viewModel::onGenerateQrClick) {
-                    Icon(Icons.Filled.QrCode, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text("Generuj")
                 }
             }
         }
