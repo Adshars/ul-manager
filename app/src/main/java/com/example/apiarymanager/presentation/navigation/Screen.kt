@@ -22,6 +22,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object DashboardRoute
 
+@Serializable data object ApiaryListRoute
+
+@Serializable data object TaskListRoute
+
 @Serializable data object StatisticsRoute
 
 @Serializable data object SettingsRoute
