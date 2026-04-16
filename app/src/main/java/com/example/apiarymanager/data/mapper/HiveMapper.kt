@@ -16,7 +16,8 @@ fun HiveDto.toEntity(): HiveEntity = HiveEntity(
     queenYear   = queenYear,
     status      = status,
     notes       = notes,
-    installedAt = LocalDate.parse(installedAt).toEpochDay()
+    installedAt = LocalDate.parse(installedAt).toEpochDay(),
+    qrCode      = qrCode
 )
 
 // ─── Entity → Domain ─────────────────────────────────────────────────────────
@@ -32,7 +33,8 @@ fun HiveEntity.toDomain(): Hive = Hive(
     superboxCount = superboxCount,
     queenOrigin   = queenOrigin,
     notes         = notes,
-    installedAt   = LocalDate.ofEpochDay(installedAt)
+    installedAt   = LocalDate.ofEpochDay(installedAt),
+    qrCode        = qrCode
 )
 
 // ─── Domain → Entity ─────────────────────────────────────────────────────────
@@ -48,5 +50,6 @@ fun Hive.toEntity(): HiveEntity = HiveEntity(
     superboxCount = superboxCount,
     queenOrigin   = queenOrigin,
     notes         = notes,
-    installedAt   = installedAt.toEpochDay()
+    installedAt   = installedAt.toEpochDay(),
+    qrCode        = qrCode
 )

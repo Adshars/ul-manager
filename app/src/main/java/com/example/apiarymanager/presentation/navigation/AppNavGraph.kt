@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.apiarymanager.presentation.apiary.ApiaryFormScreen
+import com.example.apiarymanager.presentation.apiary.ApiaryListScreen
 import com.example.apiarymanager.presentation.auth.forgotpassword.ForgotPasswordScreen
 import com.example.apiarymanager.presentation.camera.CameraScreen
 import com.example.apiarymanager.presentation.dashboard.DashboardScreen
@@ -15,6 +16,7 @@ import com.example.apiarymanager.presentation.harvest.HarvestFormScreen
 import com.example.apiarymanager.presentation.hive.detail.HiveDetailScreen
 import com.example.apiarymanager.presentation.hive.form.HiveFormScreen
 import com.example.apiarymanager.presentation.hive.list.HiveListScreen
+import com.example.apiarymanager.presentation.hive.qr.HiveQrScreen
 import com.example.apiarymanager.presentation.inspection.InspectionFormScreen
 import com.example.apiarymanager.presentation.login.LoginScreen
 import com.example.apiarymanager.presentation.onboarding.OnboardingCarouselScreen
@@ -23,6 +25,7 @@ import com.example.apiarymanager.presentation.register.RegisterScreen
 import com.example.apiarymanager.presentation.settings.SettingsScreen
 import com.example.apiarymanager.presentation.statistics.StatisticsScreen
 import com.example.apiarymanager.presentation.task.TaskFormScreen
+import com.example.apiarymanager.presentation.task.TaskListScreen
 import com.example.apiarymanager.presentation.treatment.TreatmentFormScreen
 
 @Composable
@@ -46,7 +49,8 @@ fun AppNavGraph(
                         popUpTo(LoginRoute) { inclusive = true }
                     }
                 },
-                onNavigateToRegister = { navController.navigate(RegisterRoute) }
+                onNavigateToRegister = { navController.navigate(RegisterRoute) },
+                onNavigateToForgotPassword = { navController.navigate(ForgotPasswordRoute) }
             )
         }
 
@@ -93,13 +97,37 @@ fun AppNavGraph(
 
         composable<DashboardRoute> {
             DashboardScreen(
-                onNavigateToHiveList   = { apiaryId ->
+                onNavigateToHiveList = { apiaryId ->
                     navController.navigate(HiveListRoute(apiaryId))
                 },
                 onNavigateToApiaryForm = {
                     navController.navigate(ApiaryFormRoute())
                 },
+                onNavigateToTaskForm = {
+                    navController.navigate(TaskFormRoute())
+                },
+                onNavigateToInspectionForm = { hiveId ->
+                    navController.navigate(InspectionFormRoute(hiveId = hiveId))
+                },
+                onNavigateToHarvestForm = { hiveId ->
+                    navController.navigate(HarvestFormRoute(hiveId = hiveId))
+                },
                 onOpenDrawer = onOpenDrawer
+            )
+        }
+
+        composable<ApiaryListRoute> {
+            ApiaryListScreen(
+                onNavigateToHiveList   = { apiaryId -> navController.navigate(HiveListRoute(apiaryId)) },
+                onNavigateToApiaryForm = { apiaryId -> navController.navigate(ApiaryFormRoute(apiaryId)) },
+                onOpenDrawer           = onOpenDrawer
+            )
+        }
+
+        composable<TaskListRoute> {
+            TaskListScreen(
+                onNavigateToTaskForm = { taskId -> navController.navigate(TaskFormRoute(taskId = taskId)) },
+                onOpenDrawer         = onOpenDrawer
             )
         }
 
@@ -165,6 +193,9 @@ fun AppNavGraph(
                 onNavigateToHiveForm = { apiaryId, hiveId ->
                     navController.navigate(HiveFormRoute(apiaryId, hiveId))
                 },
+                onNavigateToHiveQr = { hiveId ->
+                    navController.navigate(HiveQrRoute(hiveId))
+                },
                 onNavigateToInspectionForm = { hiveId, inspectionId ->
                     navController.navigate(InspectionFormRoute(hiveId, inspectionId))
                 },
@@ -180,6 +211,14 @@ fun AppNavGraph(
                 onNavigateToTaskForm = { hiveId, taskId ->
                     navController.navigate(TaskFormRoute(hiveId = hiveId, taskId = taskId))
                 }
+            )
+        }
+
+        // ─── Hive QR ─────────────────────────────────────────────────────────
+
+        composable<HiveQrRoute> {
+            HiveQrScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

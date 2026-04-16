@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,7 +29,9 @@ class HiveFormViewModel @Inject constructor(
     private val apiaryId = route.apiaryId
     private val hiveId   = route.hiveId
 
-    private val _uiState = MutableStateFlow(HiveFormUiState())
+    private val _uiState = MutableStateFlow(
+        HiveFormUiState(qrCode = UUID.randomUUID().toString())
+    )
     val uiState: StateFlow<HiveFormUiState> = _uiState.asStateFlow()
 
     private val _events = Channel<HiveFormEvent>(Channel.BUFFERED)
@@ -53,7 +56,8 @@ class HiveFormViewModel @Inject constructor(
                             superboxCount = h.superboxCount.toString(),
                             queenOrigin  = h.queenOrigin,
                             status       = h.status.name,
-                            notes        = h.notes
+                            notes        = h.notes,
+                            qrCode       = h.qrCode.ifBlank { it.qrCode } // keep generated UUID if DB has none
                         )
                     }
                 }
@@ -96,7 +100,8 @@ class HiveFormViewModel @Inject constructor(
             superboxCount = state.superboxCount.toIntOrNull() ?: 0,
             queenOrigin   = state.queenOrigin.trim(),
             status        = runCatching { HiveStatus.valueOf(state.status) }.getOrDefault(HiveStatus.ACTIVE),
-            notes         = state.notes.trim()
+            notes         = state.notes.trim(),
+            qrCode        = state.qrCode.ifBlank { UUID.randomUUID().toString() }
         )
 
         viewModelScope.launch {

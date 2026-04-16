@@ -64,7 +64,7 @@ class RegisterViewModel @Inject constructor() : ViewModel() {
     private fun validate(): Boolean {
         val state = _uiState.value
 
-        val fullNameError    = if (state.fullName.isBlank()) "Podaj imię i nazwisko" else null
+        val fullNameError    = if (state.fullName.isBlank()) "Podaj nazwę użytkownika" else null
         val emailError       = when {
             state.email.isBlank()          -> "Podaj adres e-mail"
             !state.email.contains('@')     -> "Nieprawidłowy adres e-mail"

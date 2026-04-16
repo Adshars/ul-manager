@@ -29,11 +29,11 @@ private data class DrawerItem(
 )
 
 private val drawerItems = listOf(
-    DrawerItem(Icons.Filled.Home,         "Dashboard",   DashboardRoute),
-    DrawerItem(Icons.Filled.Hive,         "Pasieki",     DashboardRoute),
-    DrawerItem(Icons.Outlined.CheckCircle,"Zadania",     TaskFormRoute()),
-    DrawerItem(Icons.Filled.BarChart,     "Statystyki",  StatisticsRoute),
-    DrawerItem(Icons.Filled.Settings,     "Ustawienia",  SettingsRoute)
+    DrawerItem(Icons.Filled.Home,          "Dashboard",  DashboardRoute),
+    DrawerItem(Icons.Filled.Hive,          "Pasieki",    ApiaryListRoute),
+    DrawerItem(Icons.Outlined.CheckCircle, "Zadania",    TaskListRoute),
+    DrawerItem(Icons.Filled.BarChart,      "Statystyki", StatisticsRoute),
+    DrawerItem(Icons.Filled.Settings,      "Ustawienia", SettingsRoute)
 )
 
 @Composable

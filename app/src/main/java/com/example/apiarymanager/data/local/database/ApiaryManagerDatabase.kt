@@ -27,7 +27,7 @@ import com.example.apiarymanager.data.local.entity.TreatmentEntity
         TreatmentEntity::class,
         FeedingEntity::class
     ],
-    version = 3,   // v3: added honey_harvests, treatments, feedings tables; photo_paths on inspections; new hive columns
+    version = 4,   // v4: added qr_code column to hives
     exportSchema = false
 )
 abstract class ApiaryManagerDatabase : RoomDatabase() {

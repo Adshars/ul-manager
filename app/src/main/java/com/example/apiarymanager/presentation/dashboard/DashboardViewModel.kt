@@ -2,6 +2,7 @@ package com.example.apiarymanager.presentation.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.apiarymanager.domain.model.Apiary
 import com.example.apiarymanager.domain.model.Task
 import com.example.apiarymanager.domain.repository.ApiaryRepository
 import com.example.apiarymanager.domain.repository.HiveRepository
@@ -9,16 +10,19 @@ import com.example.apiarymanager.domain.repository.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -33,13 +37,17 @@ class DashboardViewModel @Inject constructor(
     private val _events = Channel<DashboardEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
+    private val _pickerState = MutableStateFlow(HivePickerState())
+
     val uiState: StateFlow<DashboardUiState> = combine(
         apiariesWithCountsFlow(),
-        pendingTasksFlow()
-    ) { apiaries, tasks ->
+        pendingTasksFlow(),
+        _pickerState
+    ) { apiaries, tasks, picker ->
         DashboardUiState(
             apiaries     = apiaries,
             pendingTasks = tasks,
+            hivePicker   = picker,
             isLoading    = false
         )
     }
@@ -66,13 +74,53 @@ class DashboardViewModel @Inject constructor(
     }
 
     fun onQuickActionClick(type: QuickActionType) {
-        val message = when (type) {
-            QuickActionType.NEW_INSPECTION -> "Wybierz ul z listy pasiek poniżej"
-            QuickActionType.HARVEST        -> "Funkcja miodobrania — wkrótce dostępna"
-            QuickActionType.ADD_TASK       -> "Formularz zadań — wkrótce dostępny"
-            QuickActionType.MAP            -> "Mapa pasiek — wkrótce dostępna"
+        viewModelScope.launch {
+            when (type) {
+                QuickActionType.NEW_INSPECTION,
+                QuickActionType.HARVEST -> {
+                    if (uiState.value.apiaries.isEmpty()) {
+                        _events.send(DashboardEvent.ShowMessage("Najpierw dodaj pasiekę"))
+                    } else {
+                        _pickerState.update { HivePickerState(isOpen = true, action = type) }
+                    }
+                }
+                QuickActionType.ADD_TASK -> _events.send(DashboardEvent.NavigateToTaskForm)
+                QuickActionType.MAP      -> _events.send(DashboardEvent.ShowMessage("Mapa pasiek — wkrótce dostępna"))
+            }
         }
-        viewModelScope.launch { _events.send(DashboardEvent.ShowMessage(message)) }
+    }
+
+    fun onPickerApiarySelected(apiary: Apiary) {
+        _pickerState.update { it.copy(selectedApiary = apiary, isLoadingHives = true, hives = emptyList()) }
+        viewModelScope.launch {
+            try {
+                val hives = hiveRepository.getHivesByApiary(apiary.id).first()
+                _pickerState.update { it.copy(hives = hives, isLoadingHives = false) }
+            } catch (e: Exception) {
+                _pickerState.update { it.copy(isLoadingHives = false) }
+                _events.send(DashboardEvent.ShowMessage("Błąd podczas wczytywania uli"))
+            }
+        }
+    }
+
+    fun onPickerHiveSelected(hiveId: Long) {
+        val action = _pickerState.value.action
+        _pickerState.update { HivePickerState() }
+        viewModelScope.launch {
+            when (action) {
+                QuickActionType.NEW_INSPECTION -> _events.send(DashboardEvent.NavigateToInspectionForm(hiveId))
+                QuickActionType.HARVEST        -> _events.send(DashboardEvent.NavigateToHarvestForm(hiveId))
+                else -> {}
+            }
+        }
+    }
+
+    fun onPickerBackToApiaries() {
+        _pickerState.update { it.copy(selectedApiary = null, hives = emptyList()) }
+    }
+
+    fun onPickerDismiss() {
+        _pickerState.update { HivePickerState() }
     }
 
     // ─── Private flow builders ────────────────────────────────────────────────

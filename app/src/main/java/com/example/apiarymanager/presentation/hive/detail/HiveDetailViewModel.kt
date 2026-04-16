@@ -85,6 +85,8 @@ class HiveDetailViewModel @Inject constructor(
         viewModelScope.launch { _events.send(HiveDetailEvent.NavigateToHiveForm(apiary, hiveId)) }
     }
 
+    fun onViewQrClick() { send(HiveDetailEvent.NavigateToHiveQr(hiveId)) }
+
     fun onAddInspection()          { send(HiveDetailEvent.NavigateToInspectionForm(hiveId, null)) }
     fun onEditInspection(id: Long) { send(HiveDetailEvent.NavigateToInspectionForm(hiveId, id))  }
     fun onDeleteInspection(id: Long) {

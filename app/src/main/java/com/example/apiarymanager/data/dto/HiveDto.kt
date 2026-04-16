@@ -12,5 +12,6 @@ data class HiveDto(
     val queenYear: Int?,
     val status: String,
     val notes: String,
-    val installedAt: String  // ISO-8601: "2024-04-01"
+    val installedAt: String,  // ISO-8601: "2024-04-01"
+    val qrCode: String = ""
 )

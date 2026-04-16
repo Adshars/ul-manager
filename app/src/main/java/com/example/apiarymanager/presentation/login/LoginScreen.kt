@@ -25,14 +25,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -52,26 +49,22 @@ import com.example.apiarymanager.presentation.theme.ApiaryManagerTheme
 fun LoginScreen(
     onNavigateToDashboard: () -> Unit,
     onNavigateToRegister: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 LoginEvent.NavigateToDashboard    -> onNavigateToDashboard()
                 LoginEvent.NavigateToRegister     -> onNavigateToRegister()
-                LoginEvent.ShowForgotPasswordInfo -> snackbarHostState.showSnackbar(
-                    "Resetowanie hasła będzie dostępne po połączeniu z API."
-                )
+                LoginEvent.NavigateToForgotPassword -> onNavigateToForgotPassword()
             }
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { innerPadding ->
+    Scaffold { innerPadding ->
         LoginContent(
             uiState = uiState,
             onEmailChange = viewModel::onEmailChange,

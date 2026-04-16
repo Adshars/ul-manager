@@ -22,6 +22,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object DashboardRoute
 
+@Serializable data object ApiaryListRoute
+
+@Serializable data object TaskListRoute
+
 @Serializable data object StatisticsRoute
 
 @Serializable data object SettingsRoute
@@ -43,6 +47,9 @@ import kotlinx.serialization.Serializable
 
 /** [hiveId] — which hive to show in detail; [initialTab] — tab index to open */
 @Serializable data class HiveDetailRoute(val hiveId: Long, val initialTab: Int = 0)
+
+/** QR code view and management for a specific hive */
+@Serializable data class HiveQrRoute(val hiveId: Long)
 
 // ─── Inspection ───────────────────────────────────────────────────────────────
 

@@ -11,6 +11,7 @@ data class HiveFormUiState(
     val queenOrigin: String = "",
     val status: String = "ACTIVE",
     val notes: String = "",
+    val qrCode: String = "",
     // errors
     val nameError: String? = null,
     val numberError: String? = null

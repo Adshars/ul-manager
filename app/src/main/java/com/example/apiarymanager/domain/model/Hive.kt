@@ -13,7 +13,8 @@ data class Hive(
     val superboxCount: Int = 0,
     val queenOrigin: String = "",
     val notes: String = "",
-    val installedAt: LocalDate = LocalDate.now()
+    val installedAt: LocalDate = LocalDate.now(),
+    val qrCode: String = ""
 )
 
 enum class HiveStatus {

@@ -27,9 +27,6 @@ data class InspectionFormUiState(
     val notes: String = "",
     // Photos
     val photoPaths: List<String> = emptyList(),
-    // QR code dialog
-    val showQrDialog: Boolean = false,
-    val qrBitmap: android.graphics.Bitmap? = null,
     // Screen state
     val isLoading: Boolean = false,
     val isSaving: Boolean = false
