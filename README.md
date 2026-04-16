@@ -1,6 +1,6 @@
 # ApiaryManager
 
-Aplikacja mobilna do zarządzania pasieką. Aktualny stan repozytorium to **funkcjonalna makieta (Functional Mockup)** — cały interfejs działa w oparciu o lokalne dane mockowane zapisywane w bazie Room. Docelowy backend w C# zostanie podłączony bez przebudowy warstwy prezentacji.
+Aplikacja mobilna do zarządzania pasieką. Aktualny stan repozytorium to **funkcjonalna makieta (Functional Mockup)** — cały interfejs działa w oparciu o lokalne dane zapisywane w bazie Room. Docelowy backend w C# zostanie podłączony bez przebudowy warstwy prezentacji.
 
 ---
 
@@ -12,9 +12,10 @@ Aplikacja mobilna do zarządzania pasieką. Aktualny stan repozytorium to **funk
 | UI | Jetpack Compose + Material 3 |
 | Architektura | MVVM + Clean Architecture |
 | DI | Hilt 2.54 |
-| Baza danych | Room 2.6 |
+| Baza danych | Room 2.6 (schemat v4) |
 | Nawigacja | Navigation Compose 2.8 (type-safe routes) |
 | Asynchroniczność | Kotlin Coroutines + Flow |
+| Generowanie QR | ZXing Core |
 | Build | Gradle 8.9 + KSP + Version Catalog |
 | Min SDK | 26 (Android 8.0) |
 
@@ -41,43 +42,74 @@ Docelowo warstwa `data/` rozszerzy się o klienta API (Retrofit). Dzięki wzorco
 
 ---
 
-## Co robi makieta
+## Funkcjonalności makiety
 
-### Ekran logowania i rejestracji
+### Uwierzytelnianie
 
-- Walidacja pól formularza (format e-mail, minimalna długość hasła, zgodność haseł)
-- Przycisk "Zaloguj się" / "Zarejestruj się" symuluje żądanie sieciowe: przez 1 sekundę wyświetla spinner, następnie przekierowuje na Dashboard
-- Dane wpisane w formularz nie są nigdzie zapisywane — to celowe, uwierzytelnianie przyjdzie z backendem
-- "Zapomniałem hasła" wyświetla informację o niedostępności funkcji w trybie makiety
+- **Logowanie** — walidacja formatu e-mail i minimalnej długości hasła; symulacja żądania sieciowego (spinner 1 s) i przejście do Dashboard
+- **Rejestracja** — walidacja pól (e-mail, hasło, potwierdzenie hasła, nazwa użytkownika); symulowane tworzenie konta
+- **Resetowanie hasła** — osobny ekran z polem e-mail i symulacją wysyłki linku resetującego
 
-### Dashboard (widok główny)
+### Nawigacja
 
-- Pobiera i wyświetla wszystkie pasieki z lokalnej bazy Room wraz z liczbą aktywnych uli przy każdej
-- Lista zadań do wykonania: filtruje zadania przeterminowane lub na dziś, sortuje po dacie i priorytecie
-- Checkbox przy zadaniu natychmiast zapisuje zmianę statusu (`setTaskCompleted`) do bazy Room i odświeża listę reaktywnie przez Flow
-- Cztery przyciski szybkich akcji (Nowy przegląd, Miodobranie, Dodaj zadanie, Mapa pasiek) wyświetlają komunikat "wkrótce dostępne"
-- Kliknięcie karty pasieki przechodzi do listy uli tej pasieki
+- Boczna szuflada (`ModalNavigationDrawer`) z pozycjami: Dashboard, Pasieki, Zadania, Statystyki, Ustawienia
+- Aktywna pozycja menu wyróżniona dynamicznie na podstawie bieżącej trasy
+- Przycisk hamburgera w TopAppBar na ekranach listy
 
-### Formularz przeglądu ula
+### Dashboard
 
-- Obsługuje dwa tryby: tworzenie nowego przeglądu (`inspectionId == null`) oraz edycję istniejącego (ładuje dane z Room przez `InspectionRepository`)
-- **Data przeglądu** — DatePickerDialog z Material 3, domyślnie dzisiejsza data
-- **Stan rodziny** — trzy niezależne checkboxy: matka widoczna, czerw widoczny, mateczniki widoczne
-- **Siła rodziny** — Slider z 5 pozycjami: Krytyczna / Słaba / Normalna / Silna / Bardzo Silna; aktywna pozycja wyróżniona kolorem i pogrubieniem
-- **Zmiany w ulu** — Switch włącza/wyłącza sekcję liczników z animowanym rozwinięciem (AnimatedVisibility); liczniki z przyciskami [−] i [+] dla: nadstawki dodane, nadstawki usunięte, ramki z suszem, węzy; wartości nie schodzą poniżej zera
-- **Pola tekstowe** — osobne pola na zaobserwowane problemy i dodatkowe notatki
-- Przycisk "Zapisz przegląd" wywołuje `SaveInspectionUseCase`, który decyduje między `insert` a `update` na podstawie id, a po sukcesie wraca do poprzedniego ekranu
+- Lista pasiek z liczbą aktywnych uli przy każdej; kliknięcie przechodzi do listy uli pasieki
+- Lista zadań na dziś i zaległych, sortowana po dacie; checkbox natychmiast zapisuje zmianę statusu do Room
+- **Szybkie akcje:**
+  - *Nowy przegląd* i *Miodobranie* — otwierają dwuetapowy `ModalBottomSheet`: wybór pasieki → wybór ula, po czym przechodzą do odpowiedniego formularza
+  - *Dodaj zadanie* — przechodzi bezpośrednio do formularza zadania
+
+### Pasieki (`ApiaryListScreen`)
+
+- Lista pasiek z lokalizacją i liczbą aktywnych uli
+- Dodawanie, edycja i usuwanie pasiek z dialogiem potwierdzenia usunięcia
+- Kliknięcie pasieki otwiera listę jej uli
+
+### Ule
+
+- **Lista uli** (`HiveListScreen`) — karty z nazwą, numerem i statusem; przejście do szczegółów ula lub formularza dodawania
+- **Formularz ula** (`HiveFormScreen`) — pola: nazwa, numer, rok matki, typ ramy, liczba nadstawek, pochodzenie matki, status, notatki; przy tworzeniu nowego ula automatycznie generowany jest unikalny UUID przypisany jako kod QR
+- **Szczegóły ula** (`HiveDetailScreen`) — widok zakładkowy z sekcjami: Szczegóły, Przeglądy, Miodobrania, Leczenia, Dokarmiania, Zadania; FAB dodaje nowy rekord w aktywnej zakładce
+- **Kod QR ula** (`HiveQrScreen`) — wyświetla wygenerowany kod QR; opcja wysłania kodu pocztą e-mail jako załącznik PNG; regeneracja kodu (z dialogiem potwierdzenia — stary kod przestaje obowiązywać)
+
+### Przegląd ula (`InspectionFormScreen`)
+
+- Tryby tworzenia i edycji
+- DatePickerDialog (Material 3) z domyślną datą dzisiejszą
+- Trzy checkboxy: matka widoczna, czerw widoczny, mateczniki widoczne
+- Slider siły rodziny (5 stopni: Krytyczna → Bardzo Silna)
+- Sekcja zarządzania ramkami (switch + AnimatedVisibility): nadstawki dodane/usunięte, ramki z suszem, węzy
+- Dodawanie zdjęć z aparatu lub galerii; podgląd miniatur z możliwością usunięcia
+- Pola tekstowe na problemy i notatki
+
+### Miodobranie, Leczenia, Dokarmiania
+
+Osobne formularze (`HarvestFormScreen`, `TreatmentFormScreen`, `FeedingFormScreen`) powiązane z ulem; dane zapisywane do Room.
+
+### Zadania (`TaskListScreen`)
+
+- **Widok listy** — zadania pogrupowane w sekcje: Zaległe, Dzisiaj, Nadchodzące, Ukończone
+- **Widok kalendarza** — niestandardowy kalendarz miesięczny z nawigacją, polskimi nagłówkami dni (pn–nd), kolorowymi kropkami pod datami, które mają zaplanowane zadania, oraz wyróżnieniem wybranego dnia
+- Filtr: Wszystkie / Aktywne / Ukończone
+- Checkbox przy każdym zadaniu natychmiast zapisuje zmianę statusu
+
+### Formularz zadania (`TaskFormScreen`)
+
+Tworzenie i edycja zadań z opcjonalnym powiązaniem z pasieką lub ulem, datą wykonania i priorytetem.
 
 ### Dane startowe (seed)
 
-Przy pierwszej instalacji baza jest wypełniana danymi mockowanymi:
+Przy pierwszej instalacji (i przy destruktywnej migracji) baza jest wypełniana danymi mockowanymi:
 
 - 2 pasieki: Pasieka Leśna (Bory Tucholskie) i Pasieka Ogrodowa (Gdańsk-Oliwa)
 - 8 uli o zróżnicowanych statusach (ACTIVE, WEAK, DEAD)
-- 12 przeglądów z realistycznymi obserwacjami i różnymi siłami rodzin
-- 7 zadań z różnymi priorytetami i terminami (część przeterminowana — celowo, żeby Dashboard pokazywał niepustą listę)
-
-Dane przepływają przez pełen pipeline DTO → Entity → Domain, symulując przyszłe pobieranie z API.
+- 12 przeglądów z realistycznymi obserwacjami
+- Zadania z różnymi priorytetami i terminami (część przeterminowana — celowo, żeby widoki pokazywały niepuste listy)
 
 ---
 
@@ -85,13 +117,15 @@ Dane przepływają przez pełen pipeline DTO → Entity → Domain, symulując p
 
 ```
 com.example.apiarymanager/
-├── core/util/                  Resource.kt (sealed class Loading/Success/Error)
+├── core/
+│   ├── security/               PinManager (biometria / PIN)
+│   └── util/                   Resource.kt
 ├── data/
-│   ├── dto/                    ApiaryDto, HiveDto, InspectionDto, TaskDto
+│   ├── dto/                    ApiaryDto, HiveDto, InspectionDto, TaskDto, ...
 │   ├── local/
-│   │   ├── dao/                ApiaryDao, HiveDao, InspectionDao, TaskDao
-│   │   ├── database/           ApiaryManagerDatabase (Room, v2)
-│   │   └── seeder/             DatabaseSeeder (dane mockowane)
+│   │   ├── dao/                ApiaryDao, HiveDao, InspectionDao, TaskDao, ...
+│   │   ├── database/           ApiaryManagerDatabase (Room, v4)
+│   │   └── seeder/             DatabaseSeeder
 │   ├── mapper/                 *Mapper.kt — DTO↔Entity↔Domain
 │   ├── entity/                 *Entity.kt — Room @Entity z @ForeignKey
 │   └── repository/             *RepositoryImpl.kt
@@ -100,19 +134,30 @@ com.example.apiarymanager/
 │   ├── DatabaseModule.kt       Room + fallbackToDestructiveMigration (DEV)
 │   └── RepositoryModule.kt     @Binds interface → impl
 ├── domain/
-│   ├── model/                  Apiary, Hive, Inspection, Task + enumy
+│   ├── model/                  Apiary, Hive, Inspection, Task, HoneyHarvest, ...
 │   ├── repository/             interfejsy repozytoriów
 │   └── usecase/                SaveInspectionUseCase
 └── presentation/
-    ├── navigation/             Screen.kt (type-safe routes), AppNavGraph.kt
+    ├── navigation/             Screen.kt (type-safe routes), AppNavGraph.kt, AppDrawer.kt
     ├── theme/                  Color.kt, Type.kt, Theme.kt
+    ├── auth/
+    │   └── forgotpassword/     ForgotPasswordScreen, ForgotPasswordViewModel
     ├── login/                  LoginScreen, LoginViewModel
     ├── register/               RegisterScreen, RegisterViewModel
-    ├── dashboard/              DashboardScreen, DashboardViewModel
+    ├── dashboard/              DashboardScreen, DashboardViewModel, HivePickerBottomSheet
+    ├── apiary/                 ApiaryListScreen, ApiaryFormScreen + ViewModels
     ├── hive/
-    │   ├── list/               HiveListScreen (placeholder)
-    │   └── detail/             HiveDetailScreen (placeholder)
-    └── inspection/             InspectionFormScreen, InspectionFormViewModel
+    │   ├── list/               HiveListScreen, HiveListViewModel
+    │   ├── form/               HiveFormScreen, HiveFormViewModel
+    │   ├── detail/             HiveDetailScreen, HiveDetailViewModel
+    │   └── qr/                 HiveQrScreen, HiveQrViewModel
+    ├── inspection/             InspectionFormScreen, InspectionFormViewModel
+    ├── harvest/                HarvestFormScreen, HarvestFormViewModel
+    ├── treatment/              TreatmentFormScreen, TreatmentFormViewModel
+    ├── feeding/                FeedingFormScreen, FeedingFormViewModel
+    ├── task/                   TaskListScreen, TaskFormScreen + ViewModels
+    ├── statistics/             StatisticsScreen (placeholder)
+    └── settings/               SettingsScreen (placeholder)
 ```
 
 ---
@@ -144,13 +189,24 @@ Przy pierwszym uruchomieniu Room wykrywa pustą bazę i wywołuje `DatabaseSeede
 |----------------|--------|
 | Login + walidacja | gotowe |
 | Register + walidacja | gotowe |
-| Dashboard — pasieki + zadania + checkbox | gotowe |
+| Resetowanie hasła (makieta) | gotowe |
+| Dashboard — pasieki, zadania, szybkie akcje | gotowe |
+| Lista pasiek z CRUD | gotowe |
+| Formularz pasieki | gotowe |
+| Lista uli | gotowe |
+| Formularz ula z auto-generacją QR | gotowe |
+| Szczegóły ula (6 zakładek) | gotowe |
+| Kod QR ula — podgląd, email, regeneracja | gotowe |
 | Formularz przeglądu (tworzenie i edycja) | gotowe |
-| Lista uli | placeholder |
-| Szczegóły ula | placeholder |
-| Formularz zadania | placeholder |
-| Mapa pasiek | placeholder |
-| Profil / ustawienia | placeholder |
+| Formularz miodobrania | gotowe |
+| Formularz leczenia | gotowe |
+| Formularz dokarmiania | gotowe |
+| Lista zadań (lista + kalendarz) | gotowe |
+| Formularz zadania | gotowe |
+| Zdjęcia (aparat + galeria) | gotowe |
+| Nawigacja boczna (drawer) | gotowe |
+| Statystyki | placeholder |
+| Ustawienia | placeholder |
 | Połączenie z API (C# backend) | planowane |
 
 ---
@@ -159,7 +215,9 @@ Przy pierwszym uruchomieniu Room wykrywa pustą bazę i wywołuje `DatabaseSeede
 
 **`fallbackToDestructiveMigration()`** — baza danych jest niszczona i odtwarzana przy zmianie schematu Room. Przed release zastąpić obiektami `Migration`.
 
-**Uwierzytelnianie** — logowanie i rejestracja są symulowane. `LoginViewModel` i `RegisterViewModel` nie korzystają z żadnego repozytorium danych — po opóźnieniu 1 s przekierowują bezwarunkowo na Dashboard.
+**Uwierzytelnianie** — logowanie i rejestracja są symulowane. Po opóźnieniu 1 s przekierowują bezwarunkowo na Dashboard. Dane nie są nigdzie zapisywane — uwierzytelnianie przyjdzie z backendem.
+
+**Kod QR** — każdy ul ma unikalny UUID jako treść kodu QR, generowany przy tworzeniu ula i zapisywany w Room. Kod można zregenerować (nowy UUID, stary przestaje obowiązywać). Wysyłka e-mail korzysta z `Intent.ACTION_SEND` — otwiera systemowy arkusz udostępniania.
 
 **DTO** — klasy w `data/dto/` odzwierciedlają kontrakt przyszłego REST API. Pola dat są String (ISO-8601). Po dodaniu Retrofit wystarczy dołożyć adnotacje `@SerializedName` / `@Json` bez zmiany struktury klas.
 
