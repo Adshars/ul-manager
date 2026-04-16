@@ -50,7 +50,7 @@ class LoginViewModel @Inject constructor() : ViewModel() {
     }
 
     fun onForgotPasswordClick() {
-        viewModelScope.launch { _events.send(LoginEvent.ShowForgotPasswordInfo) }
+        viewModelScope.launch { _events.send(LoginEvent.NavigateToForgotPassword) }
     }
 
     private fun validate(): Boolean {

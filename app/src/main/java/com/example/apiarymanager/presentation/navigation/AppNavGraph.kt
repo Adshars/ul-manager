@@ -46,7 +46,8 @@ fun AppNavGraph(
                         popUpTo(LoginRoute) { inclusive = true }
                     }
                 },
-                onNavigateToRegister = { navController.navigate(RegisterRoute) }
+                onNavigateToRegister = { navController.navigate(RegisterRoute) },
+                onNavigateToForgotPassword = { navController.navigate(ForgotPasswordRoute) }
             )
         }
 
