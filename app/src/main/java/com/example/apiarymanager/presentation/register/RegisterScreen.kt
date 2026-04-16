@@ -123,7 +123,7 @@ private fun RegisterContent(
         OutlinedTextField(
             value = uiState.fullName,
             onValueChange = onFullNameChange,
-            label = { Text("Imię i nazwisko") },
+            label = { Text("Nazwa użytkownika") },
             isError = uiState.fullNameError != null,
             supportingText = uiState.fullNameError?.let { { Text(it) } },
             keyboardOptions = KeyboardOptions(
