@@ -79,6 +79,9 @@ import java.util.Locale
 fun DashboardScreen(
     onNavigateToHiveList: (apiaryId: Long) -> Unit,
     onNavigateToApiaryForm: () -> Unit = {},
+    onNavigateToTaskForm: () -> Unit = {},
+    onNavigateToInspectionForm: (hiveId: Long) -> Unit = {},
+    onNavigateToHarvestForm: (hiveId: Long) -> Unit = {},
     onOpenDrawer: () -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
@@ -88,10 +91,24 @@ fun DashboardScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is DashboardEvent.NavigateToHiveList -> onNavigateToHiveList(event.apiaryId)
-                is DashboardEvent.ShowMessage        -> snackbarHostState.showSnackbar(event.message)
+                is DashboardEvent.NavigateToHiveList       -> onNavigateToHiveList(event.apiaryId)
+                DashboardEvent.NavigateToTaskForm          -> onNavigateToTaskForm()
+                is DashboardEvent.NavigateToInspectionForm -> onNavigateToInspectionForm(event.hiveId)
+                is DashboardEvent.NavigateToHarvestForm    -> onNavigateToHarvestForm(event.hiveId)
+                is DashboardEvent.ShowMessage              -> snackbarHostState.showSnackbar(event.message)
             }
         }
+    }
+
+    if (uiState.hivePicker.isOpen) {
+        HivePickerBottomSheet(
+            pickerState      = uiState.hivePicker,
+            apiaries         = uiState.apiaries,
+            onApiarySelected = viewModel::onPickerApiarySelected,
+            onHiveSelected   = viewModel::onPickerHiveSelected,
+            onBackToApiaries = viewModel::onPickerBackToApiaries,
+            onDismiss        = viewModel::onPickerDismiss
+        )
     }
 
     Scaffold(

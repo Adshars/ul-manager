@@ -94,11 +94,20 @@ fun AppNavGraph(
 
         composable<DashboardRoute> {
             DashboardScreen(
-                onNavigateToHiveList   = { apiaryId ->
+                onNavigateToHiveList = { apiaryId ->
                     navController.navigate(HiveListRoute(apiaryId))
                 },
                 onNavigateToApiaryForm = {
                     navController.navigate(ApiaryFormRoute())
+                },
+                onNavigateToTaskForm = {
+                    navController.navigate(TaskFormRoute())
+                },
+                onNavigateToInspectionForm = { hiveId ->
+                    navController.navigate(InspectionFormRoute(hiveId = hiveId))
+                },
+                onNavigateToHarvestForm = { hiveId ->
+                    navController.navigate(HarvestFormRoute(hiveId = hiveId))
                 },
                 onOpenDrawer = onOpenDrawer
             )
