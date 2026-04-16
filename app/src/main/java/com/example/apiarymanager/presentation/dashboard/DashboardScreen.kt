@@ -32,7 +32,6 @@ import androidx.compose.material.icons.outlined.PlaylistAdd
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -113,11 +112,6 @@ fun DashboardScreen(
 
     Scaffold(
         topBar = { DashboardTopBar(onOpenDrawer = onOpenDrawer) },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToApiaryForm) {
-                Icon(Icons.Filled.Add, contentDescription = "Dodaj pasiekę")
-            }
-        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         if (uiState.isLoading) {
@@ -131,11 +125,12 @@ fun DashboardScreen(
             }
         } else {
             DashboardContent(
-                uiState             = uiState,
-                onApiaryClick       = viewModel::onApiaryClick,
-                onTaskCheckedChange = viewModel::onTaskCheckedChange,
-                onQuickActionClick  = viewModel::onQuickActionClick,
-                modifier            = Modifier.padding(innerPadding)
+                uiState               = uiState,
+                onApiaryClick         = viewModel::onApiaryClick,
+                onTaskCheckedChange   = viewModel::onTaskCheckedChange,
+                onQuickActionClick    = viewModel::onQuickActionClick,
+                onNavigateToApiaryForm = onNavigateToApiaryForm,
+                modifier              = Modifier.padding(innerPadding)
             )
         }
     }
@@ -191,6 +186,7 @@ private fun DashboardContent(
     onApiaryClick: (Long) -> Unit,
     onTaskCheckedChange: (Long, Boolean) -> Unit,
     onQuickActionClick: (QuickActionType) -> Unit,
+    onNavigateToApiaryForm: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -210,8 +206,9 @@ private fun DashboardContent(
         // ── Apiaries ──────────────────────────────────────────────────────────
         item {
             SectionHeader(
-                title = "Moje pasieki",
-                badge = uiState.apiaries.size.takeIf { it > 0 }
+                title      = "Moje pasieki",
+                badge      = uiState.apiaries.size.takeIf { it > 0 },
+                onAddClick = onNavigateToApiaryForm
             )
         }
         if (uiState.apiaries.isEmpty()) {
@@ -281,12 +278,14 @@ private fun GreetingHeader(modifier: Modifier = Modifier) {
 private fun SectionHeader(
     title: String,
     badge: Int? = null,
+    onAddClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val endPadding = if (onAddClick != null) 4.dp else 16.dp
     Row(
         modifier          = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(start = 16.dp, end = endPadding, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -301,6 +300,15 @@ private fun SectionHeader(
                 contentColor   = MaterialTheme.colorScheme.onPrimaryContainer
             ) {
                 Text(text = badge.toString(), style = MaterialTheme.typography.labelSmall)
+            }
+        }
+        if (onAddClick != null) {
+            IconButton(onClick = onAddClick, modifier = Modifier.size(36.dp)) {
+                Icon(
+                    imageVector        = Icons.Filled.Add,
+                    contentDescription = "Dodaj pasiekę",
+                    tint               = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
@@ -604,9 +612,10 @@ private fun DashboardContentPreview() {
                         dueDate = LocalDate.of(2024, 6, 1))
                 )
             ),
-            onApiaryClick       = {},
-            onTaskCheckedChange = { _, _ -> },
-            onQuickActionClick  = {}
+            onApiaryClick          = {},
+            onTaskCheckedChange    = { _, _ -> },
+            onQuickActionClick     = {},
+            onNavigateToApiaryForm = {}
         )
     }
 }
