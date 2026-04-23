@@ -60,3 +60,6 @@ google-services.json
 
 # Windows
 Thumbs.db
+
+# Temp / scratch files
+diff.txt
