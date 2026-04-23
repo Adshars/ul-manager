@@ -1,0 +1,23 @@
+name: Wymuszenie galezi release
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-branch:
+    name: Sprawdzanie galezi zrodlowej
+    runs-on: ubuntu-latest
+    steps:
+      - name: Walidacja prefixu release/
+        run: |
+          if [[ ! "${{ github.head_ref }}" =~ ^release/ ]]; then
+            echo "--------------------------------------------------------"
+            echo "⛔ BŁĄD: Złamanie procedury gita!"
+            echo "Do gałęzi 'main' można wciągać kod TYLKO z gałęzi 'release/...'!"
+            echo "Twoja obecna gałąź to: ${{ github.head_ref }}"
+            echo "--------------------------------------------------------"
+            exit 1
+          fi
+          echo "✅ Nazwa gałęzi poprawna. Zezwalam na procedowanie."
