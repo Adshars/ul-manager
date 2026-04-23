@@ -42,4 +42,4 @@ jobs:
           packageName: app.ulmanager.android
           releaseFiles: ${{ steps.sign_app.outputs.signedReleaseFile }}
           track: internal
-          status: completed
+          status: draft
