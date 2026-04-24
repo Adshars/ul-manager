@@ -30,4 +30,7 @@ class HiveRepositoryImpl @Inject constructor(
 
     override fun getActiveHiveCount(apiaryId: Long): Flow<Int> =
         dao.getActiveHiveCount(apiaryId)
+
+    override suspend fun getHiveByQrCode(qrCode: String): Hive? =
+        dao.getHiveByQrCode(qrCode)?.toDomain()
 }

@@ -15,7 +15,8 @@ data class HivePickerState(
     val action: QuickActionType? = null,
     val selectedApiary: Apiary? = null,
     val hives: List<Hive> = emptyList(),
-    val isLoadingHives: Boolean = false
+    val isLoadingHives: Boolean = false,
+    val isScanning: Boolean = false
 )
 
 data class DashboardUiState(
