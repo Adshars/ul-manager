@@ -8,6 +8,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @Singleton
 class PinManager @Inject constructor(
@@ -39,6 +42,16 @@ class PinManager @Inject constructor(
     var isOnboardingDone: Boolean
         get() = prefs.getBoolean(KEY_ONBOARDING_DONE, false)
         set(value) { prefs.edit().putBoolean(KEY_ONBOARDING_DONE, value).apply() }
+
+    private val _isDarkModeFlow = MutableStateFlow(prefs.getBoolean(KEY_DARK_MODE, false))
+    val isDarkModeFlow: StateFlow<Boolean> = _isDarkModeFlow.asStateFlow()
+
+    var isDarkMode: Boolean
+        get() = _isDarkModeFlow.value
+        set(value) {
+            prefs.edit().putBoolean(KEY_DARK_MODE, value).apply()
+            _isDarkModeFlow.value = value
+        }
 
     /**
      * Saves the PIN hash. Overwrites any existing PIN.
@@ -72,9 +85,10 @@ class PinManager @Inject constructor(
     }
 
     private companion object {
-        const val PREFS_FILE           = "apiary_secure_prefs"
-        const val KEY_PIN_HASH         = "pin_hash"
+        const val PREFS_FILE            = "apiary_secure_prefs"
+        const val KEY_PIN_HASH          = "pin_hash"
         const val KEY_BIOMETRIC_ENABLED = "biometric_enabled"
-        const val KEY_ONBOARDING_DONE  = "onboarding_done"
+        const val KEY_ONBOARDING_DONE   = "onboarding_done"
+        const val KEY_DARK_MODE         = "dark_mode"
     }
 }

@@ -32,4 +32,7 @@ interface HiveDao {
     /** Active hives = ACTIVE + WEAK (not DEAD/SOLD). Used by Dashboard counters. */
     @Query("SELECT COUNT(*) FROM hives WHERE apiary_id = :apiaryId AND status IN ('ACTIVE', 'WEAK')")
     fun getActiveHiveCount(apiaryId: Long): Flow<Int>
+
+    @Query("SELECT * FROM hives WHERE qr_code = :qrCode LIMIT 1")
+    suspend fun getHiveByQrCode(qrCode: String): HiveEntity?
 }

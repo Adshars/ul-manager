@@ -1,11 +1,13 @@
 package com.example.apiarymanager.presentation.navigation
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Hive
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
@@ -40,17 +42,18 @@ private val drawerItems = listOf(
 fun AppDrawerContent(
     currentRoute: String?,
     onNavigate: (Any) -> Unit,
+    onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    ModalDrawerSheet(modifier = modifier) {
+    ModalDrawerSheet(modifier = modifier.fillMaxHeight()) {
         Spacer(Modifier.height(24.dp))
 
         // Header
         Icon(
-            imageVector     = Icons.Filled.Hive,
+            imageVector        = Icons.Filled.Hive,
             contentDescription = null,
-            tint            = MaterialTheme.colorScheme.primary,
-            modifier        = Modifier
+            tint               = MaterialTheme.colorScheme.primary,
+            modifier           = Modifier
                 .padding(horizontal = 28.dp)
                 .size(40.dp)
         )
@@ -74,12 +77,22 @@ fun AppDrawerContent(
 
         drawerItems.forEach { item ->
             NavigationDrawerItem(
-                icon    = { Icon(item.icon, contentDescription = item.label) },
-                label   = { Text(item.label) },
+                icon     = { Icon(item.icon, contentDescription = item.label) },
+                label    = { Text(item.label) },
                 selected = currentRoute?.contains(item.route::class.qualifiedName ?: "") == true,
                 onClick  = { onNavigate(item.route) },
                 modifier = Modifier.padding(horizontal = 12.dp)
             )
         }
+
+        Spacer(Modifier.weight(1f))
+        HorizontalDivider()
+        NavigationDrawerItem(
+            icon     = { Icon(Icons.Filled.ExitToApp, contentDescription = "Wyloguj się", tint = MaterialTheme.colorScheme.error) },
+            label    = { Text("Wyloguj się", color = MaterialTheme.colorScheme.error) },
+            selected = false,
+            onClick  = onLogout,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+        )
     }
 }

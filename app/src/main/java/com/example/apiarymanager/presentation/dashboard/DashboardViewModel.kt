@@ -123,6 +123,31 @@ class DashboardViewModel @Inject constructor(
         _pickerState.update { HivePickerState() }
     }
 
+    fun onScanQrClick() {
+        _pickerState.update { it.copy(isScanning = true) }
+    }
+
+    fun onScanCancelled() {
+        _pickerState.update { it.copy(isScanning = false) }
+    }
+
+    fun onQrScanned(qrCode: String) {
+        val action = _pickerState.value.action
+        _pickerState.update { HivePickerState() }
+        viewModelScope.launch {
+            val hive = hiveRepository.getHiveByQrCode(qrCode)
+            if (hive == null) {
+                _events.send(DashboardEvent.ShowMessage("Nie znaleziono ula z tym kodem QR"))
+                return@launch
+            }
+            when (action) {
+                QuickActionType.NEW_INSPECTION -> _events.send(DashboardEvent.NavigateToInspectionForm(hive.id))
+                QuickActionType.HARVEST        -> _events.send(DashboardEvent.NavigateToHarvestForm(hive.id))
+                else -> {}
+            }
+        }
+    }
+
     // ─── Private flow builders ────────────────────────────────────────────────
 
     /**

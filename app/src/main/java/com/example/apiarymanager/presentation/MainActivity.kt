@@ -9,21 +9,29 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.apiarymanager.core.security.PinManager
 import com.example.apiarymanager.presentation.navigation.AppDrawerContent
 import com.example.apiarymanager.presentation.navigation.AppNavGraph
+import com.example.apiarymanager.presentation.navigation.LoginRoute
 import com.example.apiarymanager.presentation.theme.ApiaryManagerTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var pinManager: PinManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ApiaryManagerTheme {
+            val isDarkMode by pinManager.isDarkModeFlow.collectAsStateWithLifecycle()
+            ApiaryManagerTheme(darkTheme = isDarkMode, dynamicColor = false) {
                 val navController  = rememberNavController()
                 val drawerState    = rememberDrawerState(DrawerValue.Closed)
                 val scope          = rememberCoroutineScope()
@@ -40,6 +48,13 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate(route) {
                                     launchSingleTop = true
                                     restoreState    = true
+                                }
+                            },
+                            onLogout = {
+                                scope.launch { drawerState.close() }
+                                pinManager.isOnboardingDone = false
+                                navController.navigate(LoginRoute) {
+                                    popUpTo(0) { inclusive = true }
                                 }
                             }
                         )
