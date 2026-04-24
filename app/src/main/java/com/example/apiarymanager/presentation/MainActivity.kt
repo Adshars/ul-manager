@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.apiarymanager.core.security.PinManager
 import com.example.apiarymanager.presentation.navigation.AppDrawerContent
 import com.example.apiarymanager.presentation.navigation.AppNavGraph
+import com.example.apiarymanager.presentation.navigation.LoginRoute
 import com.example.apiarymanager.presentation.theme.ApiaryManagerTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -47,6 +48,13 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate(route) {
                                     launchSingleTop = true
                                     restoreState    = true
+                                }
+                            },
+                            onLogout = {
+                                scope.launch { drawerState.close() }
+                                pinManager.isOnboardingDone = false
+                                navController.navigate(LoginRoute) {
+                                    popUpTo(0) { inclusive = true }
                                 }
                             }
                         )
