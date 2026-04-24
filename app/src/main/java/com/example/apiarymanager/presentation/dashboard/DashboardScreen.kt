@@ -106,6 +106,9 @@ fun DashboardScreen(
             onApiarySelected = viewModel::onPickerApiarySelected,
             onHiveSelected   = viewModel::onPickerHiveSelected,
             onBackToApiaries = viewModel::onPickerBackToApiaries,
+            onScanQr         = viewModel::onScanQrClick,
+            onScanCancelled  = viewModel::onScanCancelled,
+            onQrScanned      = viewModel::onQrScanned,
             onDismiss        = viewModel::onPickerDismiss
         )
     }
