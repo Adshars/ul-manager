@@ -34,7 +34,9 @@ fun HiveEntity.toDomain(): Hive = Hive(
     queenOrigin   = queenOrigin,
     notes         = notes,
     installedAt   = LocalDate.ofEpochDay(installedAt),
-    qrCode        = qrCode
+    qrCode        = qrCode,
+    latitude      = latitude,
+    longitude     = longitude
 )
 
 // ─── Domain → Entity ─────────────────────────────────────────────────────────
@@ -51,5 +53,7 @@ fun Hive.toEntity(): HiveEntity = HiveEntity(
     queenOrigin   = queenOrigin,
     notes         = notes,
     installedAt   = installedAt.toEpochDay(),
-    qrCode        = qrCode
+    qrCode        = qrCode,
+    latitude      = latitude,
+    longitude     = longitude
 )

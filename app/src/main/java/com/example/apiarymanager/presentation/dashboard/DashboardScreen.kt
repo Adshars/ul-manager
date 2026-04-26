@@ -81,6 +81,8 @@ fun DashboardScreen(
     onNavigateToTaskForm: () -> Unit = {},
     onNavigateToInspectionForm: (hiveId: Long) -> Unit = {},
     onNavigateToHarvestForm: (hiveId: Long) -> Unit = {},
+    onNavigateToHivesMap: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
     onOpenDrawer: () -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
@@ -94,6 +96,7 @@ fun DashboardScreen(
                 DashboardEvent.NavigateToTaskForm          -> onNavigateToTaskForm()
                 is DashboardEvent.NavigateToInspectionForm -> onNavigateToInspectionForm(event.hiveId)
                 is DashboardEvent.NavigateToHarvestForm    -> onNavigateToHarvestForm(event.hiveId)
+                DashboardEvent.NavigateToHivesMap          -> onNavigateToHivesMap()
                 is DashboardEvent.ShowMessage              -> snackbarHostState.showSnackbar(event.message)
             }
         }
@@ -114,7 +117,7 @@ fun DashboardScreen(
     }
 
     Scaffold(
-        topBar = { DashboardTopBar(onOpenDrawer = onOpenDrawer) },
+        topBar = { DashboardTopBar(onOpenDrawer = onOpenDrawer, onNavigateToSettings = onNavigateToSettings) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         if (uiState.isLoading) {
@@ -128,12 +131,13 @@ fun DashboardScreen(
             }
         } else {
             DashboardContent(
-                uiState               = uiState,
-                onApiaryClick         = viewModel::onApiaryClick,
-                onTaskCheckedChange   = viewModel::onTaskCheckedChange,
-                onQuickActionClick    = viewModel::onQuickActionClick,
+                uiState                = uiState,
+                onApiaryClick          = viewModel::onApiaryClick,
+                onTaskCheckedChange    = viewModel::onTaskCheckedChange,
+                onQuickActionClick     = viewModel::onQuickActionClick,
                 onNavigateToApiaryForm = onNavigateToApiaryForm,
-                modifier              = Modifier.padding(innerPadding)
+                onNavigateToTaskForm   = onNavigateToTaskForm,
+                modifier               = Modifier.padding(innerPadding)
             )
         }
     }
@@ -143,7 +147,10 @@ fun DashboardScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DashboardTopBar(onOpenDrawer: () -> Unit = {}) {
+private fun DashboardTopBar(
+    onOpenDrawer: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {}
+) {
     TopAppBar(
         navigationIcon = {
             IconButton(onClick = onOpenDrawer) {
@@ -167,10 +174,10 @@ private fun DashboardTopBar(onOpenDrawer: () -> Unit = {}) {
             }
         },
         actions = {
-            IconButton(onClick = {}) {
+            IconButton(onClick = onNavigateToSettings) {
                 Icon(
                     imageVector     = Icons.Outlined.AccountCircle,
-                    contentDescription = "Profil",
+                    contentDescription = "Ustawienia",
                     tint            = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -190,6 +197,7 @@ private fun DashboardContent(
     onTaskCheckedChange: (Long, Boolean) -> Unit,
     onQuickActionClick: (QuickActionType) -> Unit,
     onNavigateToApiaryForm: () -> Unit,
+    onNavigateToTaskForm: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -230,8 +238,9 @@ private fun DashboardContent(
         item {
             Spacer(Modifier.height(8.dp))
             SectionHeader(
-                title = "Zadania do wykonania",
-                badge = uiState.pendingTasks.size.takeIf { it > 0 }
+                title      = "Zadania do wykonania",
+                badge      = uiState.pendingTasks.size.takeIf { it > 0 },
+                onAddClick = onNavigateToTaskForm
             )
         }
         if (uiState.pendingTasks.isEmpty()) {
@@ -309,7 +318,7 @@ private fun SectionHeader(
             IconButton(onClick = onAddClick, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector        = Icons.Filled.Add,
-                    contentDescription = "Dodaj pasiekę",
+                    contentDescription = "Dodaj",
                     tint               = MaterialTheme.colorScheme.primary
                 )
             }
@@ -618,7 +627,8 @@ private fun DashboardContentPreview() {
             onApiaryClick          = {},
             onTaskCheckedChange    = { _, _ -> },
             onQuickActionClick     = {},
-            onNavigateToApiaryForm = {}
+            onNavigateToApiaryForm = {},
+            onNavigateToTaskForm   = {}
         )
     }
 }

@@ -39,5 +39,6 @@ sealed interface DashboardEvent {
     data object NavigateToTaskForm : DashboardEvent
     data class NavigateToInspectionForm(val hiveId: Long) : DashboardEvent
     data class NavigateToHarvestForm(val hiveId: Long) : DashboardEvent
+    data object NavigateToHivesMap : DashboardEvent
     data class ShowMessage(val message: String) : DashboardEvent
 }

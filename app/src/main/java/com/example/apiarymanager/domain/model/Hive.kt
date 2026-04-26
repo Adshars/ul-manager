@@ -14,7 +14,9 @@ data class Hive(
     val queenOrigin: String = "",
     val notes: String = "",
     val installedAt: LocalDate = LocalDate.now(),
-    val qrCode: String = ""
+    val qrCode: String = "",
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )
 
 enum class HiveStatus {

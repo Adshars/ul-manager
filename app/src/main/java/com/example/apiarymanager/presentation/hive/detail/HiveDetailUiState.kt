@@ -27,5 +27,6 @@ sealed interface HiveDetailEvent {
     data class NavigateToFeedingForm(val hiveId: Long, val feedingId: Long?) : HiveDetailEvent
     data class NavigateToTaskForm(val hiveId: Long, val taskId: Long?) : HiveDetailEvent
     data class NavigateToHiveQr(val hiveId: Long) : HiveDetailEvent
+    data class NavigateToHiveLocation(val hiveId: Long) : HiveDetailEvent
     data class ShowMessage(val message: String) : HiveDetailEvent
 }

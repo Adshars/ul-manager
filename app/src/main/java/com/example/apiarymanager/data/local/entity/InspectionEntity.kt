@@ -76,5 +76,9 @@ data class InspectionEntity(
 
     /** Comma-separated absolute file paths of inspection photos */
     @ColumnInfo(name = "photo_paths", defaultValue = "")
-    val photoPaths: String = ""
+    val photoPaths: String = "",
+
+    /** Year of the new queen introduced during this inspection; null if no replacement */
+    @ColumnInfo(name = "new_queen_year")
+    val newQueenYear: Int? = null
 )

@@ -55,5 +55,11 @@ data class HiveEntity(
     val installedAt: Long,
 
     @ColumnInfo(name = "qr_code", defaultValue = "")
-    val qrCode: String = ""
+    val qrCode: String = "",
+
+    @ColumnInfo(name = "latitude")
+    val latitude: Double? = null,
+
+    @ColumnInfo(name = "longitude")
+    val longitude: Double? = null
 )
