@@ -56,11 +56,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Checkbox
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -609,6 +611,48 @@ private fun FrameManagementSection(
                     onIncrement = { viewModel.onFoundationFramesChange(uiState.foundationFrames + 1) }
                 )
             }
+        }
+
+        // Queen replacement
+        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+        Row(
+            modifier          = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text  = "Wymiana matki pszczelej",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text  = "Zaktualizuje rok matki w szczegółach ula",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked         = uiState.queenReplaced,
+                onCheckedChange = viewModel::onQueenReplacedChange
+            )
+        }
+
+        AnimatedVisibility(
+            visible = uiState.queenReplaced,
+            enter   = expandVertically() + fadeIn(),
+            exit    = shrinkVertically() + fadeOut()
+        ) {
+            OutlinedTextField(
+                value         = uiState.newQueenYear,
+                onValueChange = viewModel::onNewQueenYearChange,
+                label         = { Text("Rok nowej matki") },
+                placeholder   = { Text("np. 2025") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine    = true,
+                modifier      = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            )
         }
     }
 }

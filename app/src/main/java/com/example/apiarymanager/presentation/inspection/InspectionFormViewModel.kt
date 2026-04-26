@@ -92,6 +92,14 @@ class InspectionFormViewModel @Inject constructor(
     fun onFoundationFramesChange(value: Int) =
         _uiState.update { it.copy(foundationFrames = value.coerceAtLeast(0)) }
 
+    fun onQueenReplacedChange(value: Boolean) =
+        _uiState.update { it.copy(queenReplaced = value, newQueenYear = if (value) it.newQueenYear else "") }
+
+    fun onNewQueenYearChange(value: String) {
+        val filtered = value.filter { it.isDigit() }.take(4)
+        _uiState.update { it.copy(newQueenYear = filtered) }
+    }
+
     fun onProblemsChange(value: String) = _uiState.update { it.copy(problems = value) }
 
     fun onNotesChange(value: String) = _uiState.update { it.copy(notes = value) }

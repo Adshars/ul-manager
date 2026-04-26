@@ -24,7 +24,9 @@ data class Inspection(
     val problems: String = "",
     val notes: String = "",
     // Photos — list of absolute file paths stored on device
-    val photoPaths: List<String> = emptyList()
+    val photoPaths: List<String> = emptyList(),
+    // Queen replacement — set only when a new queen was introduced during this inspection
+    val newQueenYear: Int? = null
 )
 
 enum class ColonyStrength {

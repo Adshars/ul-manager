@@ -40,7 +40,7 @@ object DatabaseModule {
             ApiaryManagerDatabase::class.java,
             ApiaryManagerDatabase.DATABASE_NAME
         )
-            .addMigrations(ApiaryManagerDatabase.MIGRATION_4_5)
+            .addMigrations(ApiaryManagerDatabase.MIGRATION_4_5, ApiaryManagerDatabase.MIGRATION_5_6)
             .addCallback(object : androidx.room.RoomDatabase.Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     super.onCreate(db)

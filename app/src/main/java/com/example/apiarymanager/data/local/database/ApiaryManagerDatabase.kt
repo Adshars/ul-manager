@@ -29,7 +29,7 @@ import com.example.apiarymanager.data.local.entity.TreatmentEntity
         TreatmentEntity::class,
         FeedingEntity::class
     ],
-    version = 5,   // v5: added latitude/longitude columns to hives
+    version = 6,   // v6: added new_queen_year column to inspections
     exportSchema = false
 )
 abstract class ApiaryManagerDatabase : RoomDatabase() {
@@ -48,6 +48,12 @@ abstract class ApiaryManagerDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE hives ADD COLUMN latitude REAL")
                 db.execSQL("ALTER TABLE hives ADD COLUMN longitude REAL")
+            }
+        }
+
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE inspections ADD COLUMN new_queen_year INTEGER")
             }
         }
     }
