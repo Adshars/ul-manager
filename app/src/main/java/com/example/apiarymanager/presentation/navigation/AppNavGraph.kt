@@ -112,6 +112,9 @@ fun AppNavGraph(
                 onNavigateToHarvestForm = { hiveId ->
                     navController.navigate(HarvestFormRoute(hiveId = hiveId))
                 },
+                onNavigateToSettings = {
+                    navController.navigate(SettingsRoute)
+                },
                 onOpenDrawer = onOpenDrawer
             )
         }
