@@ -27,6 +27,9 @@ data class InspectionFormUiState(
     val notes: String = "",
     // Photos
     val photoPaths: List<String> = emptyList(),
+    // Queen replacement
+    val queenReplaced: Boolean = false,
+    val newQueenYear: String = "",
     // Screen state
     val isLoading: Boolean = false,
     val isSaving: Boolean = false
@@ -54,7 +57,8 @@ fun InspectionFormUiState.toInspection(): Inspection = Inspection(
     foundationFrames = if (framesManagementEnabled) foundationFrames else 0,
     problems         = problems.trim(),
     notes            = notes.trim(),
-    photoPaths       = photoPaths
+    photoPaths       = photoPaths,
+    newQueenYear     = if (queenReplaced) newQueenYear.toIntOrNull() else null
 )
 
 fun Inspection.toFormState(): InspectionFormUiState = InspectionFormUiState(
@@ -73,5 +77,7 @@ fun Inspection.toFormState(): InspectionFormUiState = InspectionFormUiState(
     foundationFrames = foundationFrames,
     problems         = problems,
     notes            = notes,
-    photoPaths       = photoPaths
+    photoPaths       = photoPaths,
+    queenReplaced    = newQueenYear != null,
+    newQueenYear     = newQueenYear?.toString() ?: ""
 )

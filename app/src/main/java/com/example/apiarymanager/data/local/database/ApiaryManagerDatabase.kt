@@ -2,6 +2,8 @@ package com.example.apiarymanager.data.local.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.apiarymanager.data.local.dao.ApiaryDao
 import com.example.apiarymanager.data.local.dao.FeedingDao
 import com.example.apiarymanager.data.local.dao.HiveDao
@@ -27,7 +29,7 @@ import com.example.apiarymanager.data.local.entity.TreatmentEntity
         TreatmentEntity::class,
         FeedingEntity::class
     ],
-    version = 4,   // v4: added qr_code column to hives
+    version = 6,   // v6: added new_queen_year column to inspections
     exportSchema = false
 )
 abstract class ApiaryManagerDatabase : RoomDatabase() {
@@ -41,5 +43,18 @@ abstract class ApiaryManagerDatabase : RoomDatabase() {
 
     companion object {
         const val DATABASE_NAME = "apiary_manager.db"
+
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE hives ADD COLUMN latitude REAL")
+                db.execSQL("ALTER TABLE hives ADD COLUMN longitude REAL")
+            }
+        }
+
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE inspections ADD COLUMN new_queen_year INTEGER")
+            }
+        }
     }
 }

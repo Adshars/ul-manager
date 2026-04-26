@@ -66,6 +66,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class FeedingFormRoute(val hiveId: Long, val feedingId: Long? = null)
 
+// ─── Map ─────────────────────────────────────────────────────────────────────
+
+/** Full map of all apiaries/hives */
+@Serializable data object HivesMapRoute
+
+/** Set/view location for a single hive */
+@Serializable data class HiveLocationRoute(val hiveId: Long)
+
 // ─── Tasks ────────────────────────────────────────────────────────────────────
 
 /**

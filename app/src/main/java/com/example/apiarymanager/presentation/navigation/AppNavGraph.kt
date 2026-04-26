@@ -16,7 +16,9 @@ import com.example.apiarymanager.presentation.harvest.HarvestFormScreen
 import com.example.apiarymanager.presentation.hive.detail.HiveDetailScreen
 import com.example.apiarymanager.presentation.hive.form.HiveFormScreen
 import com.example.apiarymanager.presentation.hive.list.HiveListScreen
+import com.example.apiarymanager.presentation.hive.location.HiveLocationScreen
 import com.example.apiarymanager.presentation.hive.qr.HiveQrScreen
+import com.example.apiarymanager.presentation.map.HivesMapScreen
 import com.example.apiarymanager.presentation.inspection.InspectionFormScreen
 import com.example.apiarymanager.presentation.login.LoginScreen
 import com.example.apiarymanager.presentation.onboarding.OnboardingCarouselScreen
@@ -112,6 +114,12 @@ fun AppNavGraph(
                 onNavigateToHarvestForm = { hiveId ->
                     navController.navigate(HarvestFormRoute(hiveId = hiveId))
                 },
+                onNavigateToHivesMap = {
+                    navController.navigate(HivesMapRoute)
+                },
+                onNavigateToSettings = {
+                    navController.navigate(SettingsRoute)
+                },
                 onOpenDrawer = onOpenDrawer
             )
         }
@@ -195,6 +203,9 @@ fun AppNavGraph(
                 },
                 onNavigateToHiveQr = { hiveId ->
                     navController.navigate(HiveQrRoute(hiveId))
+                },
+                onNavigateToHiveLocation = { hiveId ->
+                    navController.navigate(HiveLocationRoute(hiveId))
                 },
                 onNavigateToInspectionForm = { hiveId, inspectionId ->
                     navController.navigate(InspectionFormRoute(hiveId, inspectionId))
@@ -286,6 +297,23 @@ fun AppNavGraph(
 
         composable<TaskFormRoute> {
             TaskFormScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // ─── Map ─────────────────────────────────────────────────────────────
+
+        composable<HivesMapRoute> {
+            HivesMapScreen(
+                onNavigateToHiveDetail = { hiveId ->
+                    navController.navigate(HiveDetailRoute(hiveId))
+                },
+                onOpenDrawer = onOpenDrawer
+            )
+        }
+
+        composable<HiveLocationRoute> {
+            HiveLocationScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

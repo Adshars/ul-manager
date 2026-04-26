@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -68,6 +69,7 @@ fun HiveDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToHiveForm: (apiaryId: Long, hiveId: Long) -> Unit,
     onNavigateToHiveQr: (hiveId: Long) -> Unit,
+    onNavigateToHiveLocation: (hiveId: Long) -> Unit,
     onNavigateToInspectionForm: (hiveId: Long, inspectionId: Long?) -> Unit,
     onNavigateToHarvestForm: (hiveId: Long, harvestId: Long?) -> Unit,
     onNavigateToTreatmentForm: (hiveId: Long, treatmentId: Long?) -> Unit,
@@ -89,6 +91,8 @@ fun HiveDetailScreen(
                     onNavigateToHiveForm(event.apiaryId, event.hiveId)
                 is HiveDetailEvent.NavigateToHiveQr ->
                     onNavigateToHiveQr(event.hiveId)
+                is HiveDetailEvent.NavigateToHiveLocation ->
+                    onNavigateToHiveLocation(event.hiveId)
                 is HiveDetailEvent.NavigateToInspectionForm ->
                     onNavigateToInspectionForm(event.hiveId, event.inspectionId)
                 is HiveDetailEvent.NavigateToHarvestForm ->
@@ -116,6 +120,9 @@ fun HiveDetailScreen(
                         }
                     },
                     actions = {
+                        IconButton(onClick = viewModel::onViewLocationClick) {
+                            Icon(Icons.Outlined.LocationOn, contentDescription = "Lokalizacja ula")
+                        }
                         IconButton(onClick = viewModel::onViewQrClick) {
                             Icon(Icons.Filled.QrCode, contentDescription = "Zobacz QR kod")
                         }

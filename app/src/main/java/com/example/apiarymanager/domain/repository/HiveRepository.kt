@@ -11,4 +11,5 @@ interface HiveRepository {
     suspend fun deleteHive(id: Long)
     fun getActiveHiveCount(apiaryId: Long): Flow<Int>
     suspend fun getHiveByQrCode(qrCode: String): Hive?
+    fun getAllHives(): Flow<List<Hive>>
 }
