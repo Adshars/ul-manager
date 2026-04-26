@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Hive
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.HorizontalDivider
@@ -31,11 +32,12 @@ private data class DrawerItem(
 )
 
 private val drawerItems = listOf(
-    DrawerItem(Icons.Filled.Home,          "Dashboard",  DashboardRoute),
-    DrawerItem(Icons.Filled.Hive,          "Pasieki",    ApiaryListRoute),
-    DrawerItem(Icons.Outlined.CheckCircle, "Zadania",    TaskListRoute),
-    DrawerItem(Icons.Filled.BarChart,      "Statystyki", StatisticsRoute),
-    DrawerItem(Icons.Filled.Settings,      "Ustawienia", SettingsRoute)
+    DrawerItem(Icons.Filled.Home,          "Dashboard",    DashboardRoute),
+    DrawerItem(Icons.Filled.Hive,          "Pasieki",      ApiaryListRoute),
+    DrawerItem(Icons.Outlined.CheckCircle, "Zadania",      TaskListRoute),
+    DrawerItem(Icons.Filled.Map,           "Mapa pasiek",  HivesMapRoute),
+    DrawerItem(Icons.Filled.BarChart,      "Statystyki",   StatisticsRoute),
+    DrawerItem(Icons.Filled.Settings,      "Ustawienia",   SettingsRoute)
 )
 
 @Composable

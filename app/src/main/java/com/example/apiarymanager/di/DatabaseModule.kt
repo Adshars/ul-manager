@@ -40,9 +40,7 @@ object DatabaseModule {
             ApiaryManagerDatabase::class.java,
             ApiaryManagerDatabase.DATABASE_NAME
         )
-            // DEV ONLY: wipes the DB when schema changes without a written migration.
-            // Replace with proper Migration objects before releasing to production.
-            .fallbackToDestructiveMigration()
+            .addMigrations(ApiaryManagerDatabase.MIGRATION_4_5)
             .addCallback(object : androidx.room.RoomDatabase.Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     super.onCreate(db)

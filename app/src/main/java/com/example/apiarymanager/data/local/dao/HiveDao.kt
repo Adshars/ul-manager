@@ -35,4 +35,7 @@ interface HiveDao {
 
     @Query("SELECT * FROM hives WHERE qr_code = :qrCode LIMIT 1")
     suspend fun getHiveByQrCode(qrCode: String): HiveEntity?
+
+    @Query("SELECT * FROM hives ORDER BY apiary_id ASC, number ASC")
+    fun getAllHives(): Flow<List<HiveEntity>>
 }

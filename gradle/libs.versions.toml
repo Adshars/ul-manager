@@ -23,6 +23,7 @@ coil                    = "2.7.0"
 zxing                   = "3.5.3"
 biometric               = "1.1.0"
 securityCrypto          = "1.1.0-alpha06"
+osmdroid                = "6.1.18"
 
 [libraries]
 # AndroidX Core
@@ -83,6 +84,9 @@ biometric                           = { group = "androidx.biometric",        nam
 
 # Security crypto (EncryptedSharedPreferences)
 security-crypto                     = { group = "androidx.security",         name = "security-crypto",                version.ref = "securityCrypto" }
+
+# OSMDroid (OpenStreetMap — no API key required)
+osmdroid                            = { group = "org.osmdroid",              name = "osmdroid-android",               version.ref = "osmdroid" }
 
 # Testing
 junit                               = { group = "junit",                     name = "junit",                          version.ref = "junit" }

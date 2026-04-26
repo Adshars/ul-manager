@@ -85,7 +85,7 @@ class DashboardViewModel @Inject constructor(
                     }
                 }
                 QuickActionType.ADD_TASK -> _events.send(DashboardEvent.NavigateToTaskForm)
-                QuickActionType.MAP      -> _events.send(DashboardEvent.ShowMessage("Mapa pasiek — wkrótce dostępna"))
+                QuickActionType.MAP      -> _events.send(DashboardEvent.NavigateToHivesMap)
             }
         }
     }

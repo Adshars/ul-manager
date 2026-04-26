@@ -33,4 +33,7 @@ class HiveRepositoryImpl @Inject constructor(
 
     override suspend fun getHiveByQrCode(qrCode: String): Hive? =
         dao.getHiveByQrCode(qrCode)?.toDomain()
+
+    override fun getAllHives(): Flow<List<Hive>> =
+        dao.getAllHives().map { entities -> entities.map { it.toDomain() } }
 }

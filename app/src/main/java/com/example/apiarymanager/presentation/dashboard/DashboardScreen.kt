@@ -81,6 +81,7 @@ fun DashboardScreen(
     onNavigateToTaskForm: () -> Unit = {},
     onNavigateToInspectionForm: (hiveId: Long) -> Unit = {},
     onNavigateToHarvestForm: (hiveId: Long) -> Unit = {},
+    onNavigateToHivesMap: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onOpenDrawer: () -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
@@ -95,6 +96,7 @@ fun DashboardScreen(
                 DashboardEvent.NavigateToTaskForm          -> onNavigateToTaskForm()
                 is DashboardEvent.NavigateToInspectionForm -> onNavigateToInspectionForm(event.hiveId)
                 is DashboardEvent.NavigateToHarvestForm    -> onNavigateToHarvestForm(event.hiveId)
+                DashboardEvent.NavigateToHivesMap          -> onNavigateToHivesMap()
                 is DashboardEvent.ShowMessage              -> snackbarHostState.showSnackbar(event.message)
             }
         }
