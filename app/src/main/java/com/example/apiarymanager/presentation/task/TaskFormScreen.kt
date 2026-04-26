@@ -1,6 +1,8 @@
 package com.example.apiarymanager.presentation.task
 
+import android.content.res.Configuration
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,12 +35,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -65,21 +70,29 @@ fun TaskFormScreen(
     }
 
     if (showDatePicker) {
+        val context = LocalContext.current
+        val polishContext = remember(context) {
+            context.createConfigurationContext(
+                Configuration(context.resources.configuration).also { it.setLocale(Locale("pl")) }
+            )
+        }
         val pickerState = rememberDatePickerState(
             initialSelectedDateMillis = uiState.dueDate?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
         )
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.onDueDateChange(
-                        pickerState.selectedDateMillis?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() }
-                    )
-                    showDatePicker = false
-                }) { Text("OK") }
-            },
-            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Anuluj") } }
-        ) { DatePicker(state = pickerState) }
+        CompositionLocalProvider(LocalContext provides polishContext) {
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        viewModel.onDueDateChange(
+                            pickerState.selectedDateMillis?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() }
+                        )
+                        showDatePicker = false
+                    }) { Text("OK") }
+                },
+                dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Anuluj") } }
+            ) { DatePicker(state = pickerState) }
+        }
     }
 
     Scaffold(
@@ -137,12 +150,15 @@ fun TaskFormScreen(
 
             Spacer(Modifier.height(12.dp))
             SectionLabel("Data wykonania")
-            OutlinedTextField(
-                value         = uiState.dueDate?.format(fmt) ?: "Brak terminu",
-                onValueChange = {},
-                readOnly      = true,
-                modifier      = Modifier.fillMaxWidth().clickable { showDatePicker = true }
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value         = uiState.dueDate?.format(fmt) ?: "Brak terminu",
+                    onValueChange = {},
+                    readOnly      = true,
+                    modifier      = Modifier.fillMaxWidth()
+                )
+                Box(modifier = Modifier.matchParentSize().clip(MaterialTheme.shapes.small).clickable { showDatePicker = true })
+            }
 
             Spacer(Modifier.height(12.dp))
             SectionLabel("Priorytet")
