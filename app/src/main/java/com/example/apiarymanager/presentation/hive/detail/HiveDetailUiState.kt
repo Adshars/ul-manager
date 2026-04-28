@@ -2,6 +2,7 @@ package com.example.apiarymanager.presentation.hive.detail
 
 import com.example.apiarymanager.domain.model.Feeding
 import com.example.apiarymanager.domain.model.Hive
+import com.example.apiarymanager.domain.model.HivePhoto
 import com.example.apiarymanager.domain.model.HoneyHarvest
 import com.example.apiarymanager.domain.model.Inspection
 import com.example.apiarymanager.domain.model.Task
@@ -15,6 +16,7 @@ data class HiveDetailUiState(
     val treatments: List<Treatment> = emptyList(),
     val feedings: List<Feeding> = emptyList(),
     val tasks: List<Task> = emptyList(),
+    val photos: List<HivePhoto> = emptyList(),
     val errorMessage: String? = null
 )
 
