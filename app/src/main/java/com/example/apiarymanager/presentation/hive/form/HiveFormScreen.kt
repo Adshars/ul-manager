@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.apiarymanager.presentation.components.QueenYearDropdown
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.apiarymanager.domain.model.HiveStatus
 
@@ -136,6 +137,7 @@ fun HiveFormScreen(
                     selectedYear   = uiState.queenYear,
                     availableYears = uiState.availableQueenYears,
                     onSelect       = { viewModel.onQueenYearChange(it) },
+                    label          = "Rok matki",
                     modifier       = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(8.dp))
@@ -189,38 +191,6 @@ private fun FormSection(title: String, content: @Composable () -> Unit) {
         modifier   = Modifier.padding(top = 16.dp, bottom = 4.dp)
     )
     content()
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun QueenYearDropdown(
-    selectedYear: Int?,
-    availableYears: List<Int>,
-    onSelect: (Int?) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }, modifier = modifier) {
-        OutlinedTextField(
-            value         = selectedYear?.toString() ?: "—",
-            onValueChange = {},
-            readOnly      = true,
-            label         = { Text("Rok matki") },
-            trailingIcon  = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-            modifier      = Modifier.menuAnchor().fillMaxWidth()
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            availableYears.forEach { year ->
-                key(year) {
-                    DropdownMenuItem(
-                        text    = { Text(year.toString()) },
-                        onClick = { onSelect(year); expanded = false }
-                    )
-                }
-            }
-        }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

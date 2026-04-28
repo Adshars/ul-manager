@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.apiarymanager.domain.model.ColonyStrength
+import com.example.apiarymanager.domain.repository.HiveRepository
 import com.example.apiarymanager.domain.repository.InspectionRepository
 import com.example.apiarymanager.domain.usecase.SaveInspectionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +23,7 @@ import javax.inject.Inject
 class InspectionFormViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val inspectionRepository: InspectionRepository,
+    private val hiveRepository: HiveRepository,
     private val saveInspectionUseCase: SaveInspectionUseCase
 ) : ViewModel() {
 
@@ -39,6 +41,7 @@ class InspectionFormViewModel @Inject constructor(
 
     init {
         if (inspectionId != null) loadExistingInspection(inspectionId)
+        loadAvailableQueenYears()
         // Pick up photo path returned from CameraScreen via SavedStateHandle
         viewModelScope.launch {
             savedStateHandle.getStateFlow<String?>("capturedPhotoPath", null).collect { path ->
@@ -57,8 +60,23 @@ class InspectionFormViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             inspectionRepository.getInspectionById(id)
                 .first()
-                ?.let { inspection -> _uiState.value = inspection.toFormState() }
+                ?.let { inspection ->
+                    _uiState.update { current ->
+                        inspection.toFormState().copy(
+                            availableQueenYears = current.availableQueenYears,
+                            isLoading = false
+                        )
+                    }
+                }
             _uiState.update { it.copy(isLoading = false) }
+        }
+    }
+
+    private fun loadAvailableQueenYears() {
+        viewModelScope.launch {
+            val fromDb = hiveRepository.getDistinctQueenYears()
+            val years  = (fromDb + LocalDate.now().year).distinct().sortedDescending()
+            _uiState.update { it.copy(availableQueenYears = years) }
         }
     }
 
@@ -93,12 +111,10 @@ class InspectionFormViewModel @Inject constructor(
         _uiState.update { it.copy(foundationFrames = value.coerceAtLeast(0)) }
 
     fun onQueenReplacedChange(value: Boolean) =
-        _uiState.update { it.copy(queenReplaced = value, newQueenYear = if (value) it.newQueenYear else "") }
+        _uiState.update { it.copy(queenReplaced = value, newQueenYear = if (value) it.newQueenYear else null) }
 
-    fun onNewQueenYearChange(value: String) {
-        val filtered = value.filter { it.isDigit() }.take(4)
-        _uiState.update { it.copy(newQueenYear = filtered) }
-    }
+    fun onNewQueenYearChange(value: Int?) =
+        _uiState.update { it.copy(newQueenYear = value) }
 
     fun onProblemsChange(value: String) = _uiState.update { it.copy(problems = value) }
 
