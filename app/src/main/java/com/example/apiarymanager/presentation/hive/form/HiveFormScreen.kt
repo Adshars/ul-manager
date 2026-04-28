@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -131,13 +132,11 @@ fun HiveFormScreen(
                     modifier      = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value         = uiState.queenYear,
-                    onValueChange = viewModel::onQueenYearChange,
-                    label         = { Text("Rok matki") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine    = true,
-                    modifier      = Modifier.fillMaxWidth()
+                QueenYearDropdown(
+                    selectedYear   = uiState.queenYear,
+                    availableYears = uiState.availableQueenYears,
+                    onSelect       = { viewModel.onQueenYearChange(it) },
+                    modifier       = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
@@ -190,6 +189,38 @@ private fun FormSection(title: String, content: @Composable () -> Unit) {
         modifier   = Modifier.padding(top = 16.dp, bottom = 4.dp)
     )
     content()
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun QueenYearDropdown(
+    selectedYear: Int?,
+    availableYears: List<Int>,
+    onSelect: (Int?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }, modifier = modifier) {
+        OutlinedTextField(
+            value         = selectedYear?.toString() ?: "—",
+            onValueChange = {},
+            readOnly      = true,
+            label         = { Text("Rok matki") },
+            trailingIcon  = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            modifier      = Modifier.menuAnchor().fillMaxWidth()
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            availableYears.forEach { year ->
+                key(year) {
+                    DropdownMenuItem(
+                        text    = { Text(year.toString()) },
+                        onClick = { onSelect(year); expanded = false }
+                    )
+                }
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

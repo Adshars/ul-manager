@@ -38,4 +38,7 @@ interface HiveDao {
 
     @Query("SELECT * FROM hives ORDER BY apiary_id ASC, number ASC")
     fun getAllHives(): Flow<List<HiveEntity>>
+
+    @Query("SELECT DISTINCT queen_year FROM hives WHERE queen_year IS NOT NULL ORDER BY queen_year DESC")
+    suspend fun getDistinctQueenYears(): List<Int>
 }

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.util.UUID
 import javax.inject.Inject
 
@@ -30,7 +31,10 @@ class HiveFormViewModel @Inject constructor(
     private val hiveId   = route.hiveId
 
     private val _uiState = MutableStateFlow(
-        HiveFormUiState(qrCode = UUID.randomUUID().toString())
+        HiveFormUiState(
+            qrCode    = UUID.randomUUID().toString(),
+            queenYear = LocalDate.now().year
+        )
     )
     val uiState: StateFlow<HiveFormUiState> = _uiState.asStateFlow()
 
@@ -39,6 +43,16 @@ class HiveFormViewModel @Inject constructor(
 
     init {
         hiveId?.let { loadHive(it) }
+        loadAvailableQueenYears()
+    }
+
+    private fun loadAvailableQueenYears() {
+        viewModelScope.launch {
+            val fromDb = hiveRepository.getDistinctQueenYears()
+            val currentYear = LocalDate.now().year
+            val years = (fromDb + currentYear).distinct().sortedDescending()
+            _uiState.update { it.copy(availableQueenYears = years) }
+        }
     }
 
     private fun loadHive(id: Long) {
@@ -51,7 +65,7 @@ class HiveFormViewModel @Inject constructor(
                             isLoading    = false,
                             name         = h.name,
                             number       = h.number.toString(),
-                            queenYear    = h.queenYear?.toString() ?: "",
+                            queenYear    = h.queenYear,
                             frameType    = h.frameType,
                             superboxCount = h.superboxCount.toString(),
                             queenOrigin  = h.queenOrigin,
@@ -67,7 +81,7 @@ class HiveFormViewModel @Inject constructor(
 
     fun onNameChange(v: String)         { _uiState.update { it.copy(name = v, nameError = null) } }
     fun onNumberChange(v: String)       { _uiState.update { it.copy(number = v, numberError = null) } }
-    fun onQueenYearChange(v: String)    { _uiState.update { it.copy(queenYear = v) } }
+    fun onQueenYearChange(v: Int?)       { _uiState.update { it.copy(queenYear = v) } }
     fun onFrameTypeChange(v: String)    { _uiState.update { it.copy(frameType = v) } }
     fun onSuperboxCountChange(v: String){ _uiState.update { it.copy(superboxCount = v) } }
     fun onQueenOriginChange(v: String)  { _uiState.update { it.copy(queenOrigin = v) } }
@@ -95,7 +109,7 @@ class HiveFormViewModel @Inject constructor(
             apiaryId      = apiaryId,
             name          = state.name.trim(),
             number        = numberInt!!,
-            queenYear     = state.queenYear.toIntOrNull(),
+            queenYear     = state.queenYear,
             frameType     = state.frameType,
             superboxCount = state.superboxCount.toIntOrNull() ?: 0,
             queenOrigin   = state.queenOrigin.trim(),
