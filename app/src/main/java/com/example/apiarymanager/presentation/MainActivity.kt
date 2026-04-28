@@ -15,6 +15,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.apiarymanager.core.security.PinManager
 import com.example.apiarymanager.presentation.navigation.AppDrawerContent
 import com.example.apiarymanager.presentation.navigation.AppNavGraph
+import com.example.apiarymanager.presentation.navigation.HiveLocationRoute
+import com.example.apiarymanager.presentation.navigation.HivesMapRoute
 import com.example.apiarymanager.presentation.navigation.LoginRoute
 import com.example.apiarymanager.presentation.theme.ApiaryManagerTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,10 +39,15 @@ class MainActivity : ComponentActivity() {
                 val scope          = rememberCoroutineScope()
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = currentBackStackEntry?.destination?.route
+                val isMapScreen = currentRoute?.let {
+                    it.contains(HivesMapRoute::class.qualifiedName ?: "") ||
+                    it.contains(HiveLocationRoute::class.qualifiedName ?: "")
+                } ?: false
 
                 ModalNavigationDrawer(
-                    drawerState   = drawerState,
-                    drawerContent = {
+                    drawerState      = drawerState,
+                    gesturesEnabled  = !isMapScreen,
+                    drawerContent    = {
                         AppDrawerContent(
                             currentRoute = currentRoute,
                             onNavigate   = { route ->

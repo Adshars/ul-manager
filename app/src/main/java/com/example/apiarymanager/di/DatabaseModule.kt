@@ -7,6 +7,7 @@ import com.example.apiarymanager.data.local.database.ApiaryManagerDatabase
 import com.example.apiarymanager.data.local.dao.ApiaryDao
 import com.example.apiarymanager.data.local.dao.FeedingDao
 import com.example.apiarymanager.data.local.dao.HiveDao
+import com.example.apiarymanager.data.local.dao.HivePhotoDao
 import com.example.apiarymanager.data.local.dao.HoneyHarvestDao
 import com.example.apiarymanager.data.local.dao.InspectionDao
 import com.example.apiarymanager.data.local.dao.TaskDao
@@ -40,8 +41,16 @@ object DatabaseModule {
             ApiaryManagerDatabase::class.java,
             ApiaryManagerDatabase.DATABASE_NAME
         )
-            .addMigrations(ApiaryManagerDatabase.MIGRATION_4_5, ApiaryManagerDatabase.MIGRATION_5_6)
+            .addMigrations(
+                ApiaryManagerDatabase.MIGRATION_4_5,
+                ApiaryManagerDatabase.MIGRATION_5_6,
+                ApiaryManagerDatabase.MIGRATION_6_7
+            )
             .addCallback(object : androidx.room.RoomDatabase.Callback() {
+                override fun onOpen(db: SupportSQLiteDatabase) {
+                    super.onOpen(db)
+                    db.execSQL("PRAGMA foreign_keys = ON")
+                }
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     super.onCreate(db)
                     appScope.launch { DatabaseSeeder.seed(database) }
@@ -76,4 +85,7 @@ object DatabaseModule {
 
     @Provides
     fun provideFeedingDao(db: ApiaryManagerDatabase): FeedingDao = db.feedingDao()
+
+    @Provides
+    fun provideHivePhotoDao(db: ApiaryManagerDatabase): HivePhotoDao = db.hivePhotoDao()
 }

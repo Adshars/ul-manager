@@ -36,4 +36,7 @@ class HiveRepositoryImpl @Inject constructor(
 
     override fun getAllHives(): Flow<List<Hive>> =
         dao.getAllHives().map { entities -> entities.map { it.toDomain() } }
+
+    override suspend fun getDistinctQueenYears(): List<Int> =
+        dao.getDistinctQueenYears()
 }
