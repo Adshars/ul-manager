@@ -10,6 +10,7 @@ import com.example.apiarymanager.domain.model.Inspection
 import com.example.apiarymanager.domain.model.Task
 import com.example.apiarymanager.domain.model.Treatment
 import com.example.apiarymanager.domain.repository.FeedingRepository
+import com.example.apiarymanager.domain.repository.HivePhotoRepository
 import com.example.apiarymanager.domain.repository.HiveRepository
 import com.example.apiarymanager.domain.repository.HoneyHarvestRepository
 import com.example.apiarymanager.domain.repository.InspectionRepository
@@ -36,7 +37,8 @@ class HiveDetailViewModel @Inject constructor(
     private val harvestRepository: HoneyHarvestRepository,
     private val treatmentRepository: TreatmentRepository,
     private val feedingRepository: FeedingRepository,
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
+    private val hivePhotoRepository: HivePhotoRepository
 ) : ViewModel() {
 
     private val route: HiveDetailRoute = savedStateHandle.toRoute()
@@ -58,8 +60,9 @@ class HiveDetailViewModel @Inject constructor(
 
     val uiState: StateFlow<HiveDetailUiState> = combine(
         hiveRepository.getHiveById(hiveId),
-        activitiesFlow
-    ) { hive, activities ->
+        activitiesFlow,
+        hivePhotoRepository.getPhotosByHive(hiveId)
+    ) { hive, activities, photos ->
         HiveDetailUiState(
             isLoading   = false,
             hive        = hive,
@@ -67,7 +70,8 @@ class HiveDetailViewModel @Inject constructor(
             harvests    = activities.harvests,
             treatments  = activities.treatments,
             feedings    = activities.feedings,
-            tasks       = activities.tasks
+            tasks       = activities.tasks,
+            photos      = photos
         )
     }
     .onStart { emit(HiveDetailUiState(isLoading = true)) }
@@ -113,6 +117,10 @@ class HiveDetailViewModel @Inject constructor(
     fun onEditTask(id: Long)       { send(HiveDetailEvent.NavigateToTaskForm(hiveId, id))         }
     fun onTaskCheckedChange(id: Long, done: Boolean) {
         viewModelScope.launch { taskRepository.setTaskCompleted(id, done) }
+    }
+
+    fun onDeletePhoto(id: Long) {
+        viewModelScope.launch { hivePhotoRepository.deletePhoto(id) }
     }
 
     private fun send(event: HiveDetailEvent) {

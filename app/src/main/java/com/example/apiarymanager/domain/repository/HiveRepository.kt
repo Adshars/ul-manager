@@ -12,4 +12,5 @@ interface HiveRepository {
     fun getActiveHiveCount(apiaryId: Long): Flow<Int>
     suspend fun getHiveByQrCode(qrCode: String): Hive?
     fun getAllHives(): Flow<List<Hive>>
+    suspend fun getDistinctQueenYears(): List<Int>
 }

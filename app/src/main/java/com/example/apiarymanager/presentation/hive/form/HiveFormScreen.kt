@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.apiarymanager.presentation.components.QueenYearDropdown
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.apiarymanager.domain.model.HiveStatus
 
@@ -131,13 +133,12 @@ fun HiveFormScreen(
                     modifier      = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value         = uiState.queenYear,
-                    onValueChange = viewModel::onQueenYearChange,
-                    label         = { Text("Rok matki") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine    = true,
-                    modifier      = Modifier.fillMaxWidth()
+                QueenYearDropdown(
+                    selectedYear   = uiState.queenYear,
+                    availableYears = uiState.availableQueenYears,
+                    onSelect       = { viewModel.onQueenYearChange(it) },
+                    label          = "Rok matki",
+                    modifier       = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(

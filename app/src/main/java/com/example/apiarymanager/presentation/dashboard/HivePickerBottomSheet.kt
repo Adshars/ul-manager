@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.apiarymanager.domain.model.Apiary
+import com.example.apiarymanager.domain.model.HiveStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -195,7 +196,7 @@ private fun PickerStep(
                             Icon(
                                 imageVector        = Icons.Filled.Hive,
                                 contentDescription = null,
-                                tint               = MaterialTheme.colorScheme.secondary,
+                                tint               = hiveStatusColor(hive.status),
                                 modifier           = Modifier.size(24.dp)
                             )
                         },
@@ -206,6 +207,14 @@ private fun PickerStep(
             }
         }
     }
+}
+
+@Composable
+private fun hiveStatusColor(status: HiveStatus) = when (status) {
+    HiveStatus.ACTIVE -> MaterialTheme.colorScheme.primary
+    HiveStatus.WEAK   -> MaterialTheme.colorScheme.secondary
+    HiveStatus.DEAD   -> MaterialTheme.colorScheme.error
+    HiveStatus.SOLD   -> MaterialTheme.colorScheme.onSurfaceVariant
 }
 
 @Composable

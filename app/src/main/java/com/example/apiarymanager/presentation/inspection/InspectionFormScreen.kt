@@ -56,13 +56,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Checkbox
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -81,6 +79,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.apiarymanager.presentation.components.QueenYearDropdown
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.apiarymanager.domain.model.ColonyStrength
@@ -642,14 +641,12 @@ private fun FrameManagementSection(
             enter   = expandVertically() + fadeIn(),
             exit    = shrinkVertically() + fadeOut()
         ) {
-            OutlinedTextField(
-                value         = uiState.newQueenYear,
-                onValueChange = viewModel::onNewQueenYearChange,
-                label         = { Text("Rok nowej matki") },
-                placeholder   = { Text("np. 2025") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine    = true,
-                modifier      = Modifier
+            QueenYearDropdown(
+                selectedYear   = uiState.newQueenYear,
+                availableYears = uiState.availableQueenYears,
+                onSelect       = { viewModel.onNewQueenYearChange(it) },
+                label          = "Rok nowej matki",
+                modifier       = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp)
             )
