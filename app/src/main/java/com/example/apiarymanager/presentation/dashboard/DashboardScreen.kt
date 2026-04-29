@@ -28,7 +28,9 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.PlaylistAdd
+import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
@@ -78,10 +80,11 @@ import java.util.Locale
 fun DashboardScreen(
     onNavigateToHiveList: (apiaryId: Long) -> Unit,
     onNavigateToApiaryForm: () -> Unit = {},
-    onNavigateToTaskForm: () -> Unit = {},
+    onNavigateToTaskForm: (taskId: Long?) -> Unit = {},
     onNavigateToInspectionForm: (hiveId: Long) -> Unit = {},
     onNavigateToHarvestForm: (hiveId: Long) -> Unit = {},
     onNavigateToHivesMap: () -> Unit = {},
+    onNavigateToAiAnalysis: (hiveId: Long) -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onOpenDrawer: () -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
@@ -93,10 +96,11 @@ fun DashboardScreen(
         viewModel.events.collect { event ->
             when (event) {
                 is DashboardEvent.NavigateToHiveList       -> onNavigateToHiveList(event.apiaryId)
-                DashboardEvent.NavigateToTaskForm          -> onNavigateToTaskForm()
+                is DashboardEvent.NavigateToTaskForm       -> onNavigateToTaskForm(event.taskId)
                 is DashboardEvent.NavigateToInspectionForm -> onNavigateToInspectionForm(event.hiveId)
                 is DashboardEvent.NavigateToHarvestForm    -> onNavigateToHarvestForm(event.hiveId)
                 DashboardEvent.NavigateToHivesMap          -> onNavigateToHivesMap()
+                is DashboardEvent.NavigateToAiAnalysis     -> onNavigateToAiAnalysis(event.hiveId)
                 is DashboardEvent.ShowMessage              -> snackbarHostState.showSnackbar(event.message)
             }
         }
@@ -134,9 +138,10 @@ fun DashboardScreen(
                 uiState                = uiState,
                 onApiaryClick          = viewModel::onApiaryClick,
                 onTaskCheckedChange    = viewModel::onTaskCheckedChange,
+                onTaskClick            = viewModel::onTaskClick,
                 onQuickActionClick     = viewModel::onQuickActionClick,
                 onNavigateToApiaryForm = onNavigateToApiaryForm,
-                onNavigateToTaskForm   = onNavigateToTaskForm,
+                onNavigateToTaskForm   = { onNavigateToTaskForm(null) },
                 modifier               = Modifier.padding(innerPadding)
             )
         }
@@ -195,6 +200,7 @@ private fun DashboardContent(
     uiState: DashboardUiState,
     onApiaryClick: (Long) -> Unit,
     onTaskCheckedChange: (Long, Boolean) -> Unit,
+    onTaskClick: (Long) -> Unit,
     onQuickActionClick: (QuickActionType) -> Unit,
     onNavigateToApiaryForm: () -> Unit,
     onNavigateToTaskForm: () -> Unit,
@@ -248,9 +254,10 @@ private fun DashboardContent(
         } else {
             items(items = uiState.pendingTasks, key = { "task_${it.id}" }) { task ->
                 TaskItem(
-                    task           = task,
+                    task            = task,
                     onCheckedChange = { onTaskCheckedChange(task.id, it) },
-                    modifier       = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    onClick         = { onTaskClick(task.id) },
+                    modifier        = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                 )
             }
         }
@@ -335,10 +342,12 @@ private data class QuickActionItem(
 )
 
 private val quickActionItems = listOf(
-    QuickActionItem(Icons.Outlined.ContentPaste, "Nowy\nprzegląd", QuickActionType.NEW_INSPECTION),
-    QuickActionItem(Icons.Outlined.WaterDrop,    "Miodo-\nbranie",  QuickActionType.HARVEST),
-    QuickActionItem(Icons.Outlined.PlaylistAdd,  "Dodaj\nzadanie",  QuickActionType.ADD_TASK),
-    QuickActionItem(Icons.Outlined.Map,          "Mapa\npasiek",    QuickActionType.MAP)
+    QuickActionItem(Icons.Outlined.ContentPaste, "Nowy\nprzegląd",   QuickActionType.NEW_INSPECTION),
+    QuickActionItem(Icons.Outlined.WaterDrop,    "Miodo-\nbranie",   QuickActionType.HARVEST),
+    QuickActionItem(Icons.Outlined.PlaylistAdd,  "Dodaj\nzadanie",   QuickActionType.ADD_TASK),
+    QuickActionItem(Icons.Outlined.Map,          "Mapa\npasiek",     QuickActionType.MAP),
+    QuickActionItem(Icons.Outlined.Mic,          "Sterowanie\ngłosowe", QuickActionType.VOICE_CONTROL),
+    QuickActionItem(Icons.Outlined.Psychology,   "Analiza\nAI",         QuickActionType.AI_ANALYSIS)
 )
 
 @Composable
@@ -488,9 +497,11 @@ private val polishDateFormatter = DateTimeFormatter.ofPattern("d MMM", Locale("p
 private fun TaskItem(
     task: Task,
     onCheckedChange: (Boolean) -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     OutlinedCard(
+        onClick  = onClick,
         modifier = modifier.fillMaxWidth(),
         shape    = RoundedCornerShape(12.dp)
     ) {
@@ -626,6 +637,7 @@ private fun DashboardContentPreview() {
             ),
             onApiaryClick          = {},
             onTaskCheckedChange    = { _, _ -> },
+            onTaskClick            = {},
             onQuickActionClick     = {},
             onNavigateToApiaryForm = {},
             onNavigateToTaskForm   = {}

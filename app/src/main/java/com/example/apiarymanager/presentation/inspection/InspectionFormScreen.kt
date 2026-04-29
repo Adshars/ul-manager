@@ -67,7 +67,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -166,11 +171,26 @@ private fun InspectionFormContent(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val scope   = rememberCoroutineScope()
 
-    // Gallery launcher
+    // Gallery launcher — copies each file to app-private storage so the file:// URI
+    // remains valid across sessions (content://media/picker/… URIs expire on restart).
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia()
-    ) { uris: List<Uri> -> viewModel.onPhotosFromGallery(uris) }
+    ) { uris: List<Uri> ->
+        if (uris.isEmpty()) return@rememberLauncherForActivityResult
+        scope.launch(Dispatchers.IO) {
+            val dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) ?: context.filesDir
+            val paths = uris.mapNotNull { uri ->
+                runCatching {
+                    val dest = File(dir, "gallery_${System.currentTimeMillis()}_${(1000..9999).random()}.jpg")
+                    context.contentResolver.openInputStream(uri)?.use { it.copyTo(dest.outputStream()) }
+                    Uri.fromFile(dest).toString()
+                }.getOrNull()
+            }
+            withContext(Dispatchers.Main) { viewModel.onPhotosFromGallery(paths) }
+        }
+    }
 
     // Camera permission launcher — navigates to CameraScreen once granted
     val cameraPermissionLauncher = rememberLauncherForActivityResult(

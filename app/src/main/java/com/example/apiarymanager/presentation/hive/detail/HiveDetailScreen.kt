@@ -29,7 +29,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material.icons.outlined.Psychology
+import android.view.ViewGroup
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,10 +46,13 @@ import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -58,10 +62,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -89,6 +96,7 @@ fun HiveDetailScreen(
     onNavigateToTreatmentForm: (hiveId: Long, treatmentId: Long?) -> Unit,
     onNavigateToFeedingForm: (hiveId: Long, feedingId: Long?) -> Unit,
     onNavigateToTaskForm: (hiveId: Long, taskId: Long?) -> Unit,
+    onNavigateToAiAnalysis: (hiveId: Long) -> Unit,
     initialTab: Int = 0,
     viewModel: HiveDetailViewModel = hiltViewModel()
 ) {
@@ -117,6 +125,8 @@ fun HiveDetailScreen(
                     onNavigateToFeedingForm(event.hiveId, event.feedingId)
                 is HiveDetailEvent.NavigateToTaskForm ->
                     onNavigateToTaskForm(event.hiveId, event.taskId)
+                is HiveDetailEvent.NavigateToAiAnalysis ->
+                    onNavigateToAiAnalysis(event.hiveId)
                 is HiveDetailEvent.ShowMessage ->
                     snackbarHostState.showSnackbar(event.message)
             }
@@ -177,7 +187,7 @@ fun HiveDetailScreen(
         }
 
         when (selectedTab) {
-            0 -> HiveInfoTab(uiState, Modifier.padding(innerPadding))
+            0 -> HiveInfoTab(uiState, onAiAnalysis = viewModel::onAiAnalysisClick, modifier = Modifier.padding(innerPadding))
             1 -> InspectionsTab(uiState.inspections, viewModel, Modifier.padding(innerPadding))
             2 -> HarvestsTab(uiState.harvests, viewModel, Modifier.padding(innerPadding))
             3 -> TreatmentsTab(uiState.treatments, viewModel, Modifier.padding(innerPadding))
@@ -191,7 +201,7 @@ fun HiveDetailScreen(
 // ─── Tab 0: Hive info ─────────────────────────────────────────────────────────
 
 @Composable
-private fun HiveInfoTab(uiState: HiveDetailUiState, modifier: Modifier = Modifier) {
+private fun HiveInfoTab(uiState: HiveDetailUiState, onAiAnalysis: () -> Unit, modifier: Modifier = Modifier) {
     val hive = uiState.hive ?: return
     LazyColumn(modifier = modifier, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         item {
@@ -227,6 +237,17 @@ private fun HiveInfoTab(uiState: HiveDetailUiState, modifier: Modifier = Modifie
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Text(hive.notes, modifier = Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)
                 }
+            }
+        }
+
+        item {
+            Spacer(Modifier.height(8.dp))
+            androidx.compose.material3.Button(
+                onClick  = onAiAnalysis,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Outlined.Psychology, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                Text("Wyślij zdjęcie do analizy AI")
             }
         }
     }
@@ -432,7 +453,6 @@ private fun EmptyTabMessage(message: String, modifier: Modifier = Modifier) {
 
 // ─── Tab 6: Photos ────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PhotosTab(
     photos: List<HivePhoto>,
@@ -444,13 +464,42 @@ private fun PhotosTab(
         return
     }
 
-    var fullscreenPhoto by remember { mutableStateOf<HivePhoto?>(null) }
+    var fullscreenPhoto  by remember { mutableStateOf<HivePhoto?>(null) }
+    var photoToDelete    by remember { mutableStateOf<HivePhoto?>(null) }
+
+    photoToDelete?.let { photo ->
+        AlertDialog(
+            onDismissRequest = { photoToDelete = null },
+            title = { Text("Usuń zdjęcie") },
+            text  = { Text("Czy na pewno chcesz usunąć to zdjęcie? Tej operacji nie można cofnąć.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.onDeletePhoto(photo.id)
+                    photoToDelete = null
+                }) { Text("Usuń", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { photoToDelete = null }) { Text("Anuluj") }
+            }
+        )
+    }
 
     fullscreenPhoto?.let { photo ->
-        BasicAlertDialog(
+        Dialog(
             onDismissRequest = { fullscreenPhoto = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
+            // BasicAlertDialog/Dialog defaults to WRAP_CONTENT height — the window must be
+            // explicitly set to MATCH_PARENT so fillMaxSize() actually fills the screen,
+            // regardless of whether AsyncImage successfully loads the photo.
+            val dialogWindow = (LocalView.current.parent as? DialogWindowProvider)?.window
+            SideEffect {
+                dialogWindow?.setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -500,7 +549,7 @@ private fun PhotosTab(
                         .padding(4.dp)
                         .size(24.dp)
                         .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(50))
-                        .clickable { viewModel.onDeletePhoto(photo.id) },
+                        .clickable { photoToDelete = photo },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
