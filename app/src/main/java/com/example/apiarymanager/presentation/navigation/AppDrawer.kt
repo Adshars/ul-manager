@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +46,7 @@ fun AppDrawerContent(
     currentRoute: String?,
     onNavigate: (Any) -> Unit,
     onLogout: () -> Unit,
+    onVoiceControl: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     ModalDrawerSheet(modifier = modifier.fillMaxHeight()) {
@@ -86,6 +88,16 @@ fun AppDrawerContent(
                 modifier = Modifier.padding(horizontal = 12.dp)
             )
         }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        NavigationDrawerItem(
+            icon     = { Icon(Icons.Outlined.Mic, contentDescription = "Sterowanie głosowe") },
+            label    = { Text("Sterowanie głosowe") },
+            selected = false,
+            onClick  = onVoiceControl,
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
 
         Spacer(Modifier.weight(1f))
         HorizontalDivider()

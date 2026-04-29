@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.PlaylistAdd
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Badge
@@ -338,10 +339,11 @@ private data class QuickActionItem(
 )
 
 private val quickActionItems = listOf(
-    QuickActionItem(Icons.Outlined.ContentPaste, "Nowy\nprzegląd", QuickActionType.NEW_INSPECTION),
-    QuickActionItem(Icons.Outlined.WaterDrop,    "Miodo-\nbranie",  QuickActionType.HARVEST),
-    QuickActionItem(Icons.Outlined.PlaylistAdd,  "Dodaj\nzadanie",  QuickActionType.ADD_TASK),
-    QuickActionItem(Icons.Outlined.Map,          "Mapa\npasiek",    QuickActionType.MAP)
+    QuickActionItem(Icons.Outlined.ContentPaste, "Nowy\nprzegląd",   QuickActionType.NEW_INSPECTION),
+    QuickActionItem(Icons.Outlined.WaterDrop,    "Miodo-\nbranie",   QuickActionType.HARVEST),
+    QuickActionItem(Icons.Outlined.PlaylistAdd,  "Dodaj\nzadanie",   QuickActionType.ADD_TASK),
+    QuickActionItem(Icons.Outlined.Map,          "Mapa\npasiek",     QuickActionType.MAP),
+    QuickActionItem(Icons.Outlined.Mic,          "Sterowanie\ngłosowe", QuickActionType.VOICE_CONTROL)
 )
 
 @Composable

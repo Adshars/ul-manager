@@ -88,8 +88,9 @@ class DashboardViewModel @Inject constructor(
                         _pickerState.update { HivePickerState(isOpen = true, action = type) }
                     }
                 }
-                QuickActionType.ADD_TASK -> _events.send(DashboardEvent.NavigateToTaskForm())
-                QuickActionType.MAP      -> _events.send(DashboardEvent.NavigateToHivesMap)
+                QuickActionType.ADD_TASK      -> _events.send(DashboardEvent.NavigateToTaskForm())
+                QuickActionType.MAP           -> _events.send(DashboardEvent.NavigateToHivesMap)
+                QuickActionType.VOICE_CONTROL -> _events.send(DashboardEvent.ShowMessage("Już niedługo funkcja będzie dostępna"))
             }
         }
     }

@@ -31,7 +31,8 @@ enum class QuickActionType {
     NEW_INSPECTION,
     HARVEST,
     ADD_TASK,
-    MAP
+    MAP,
+    VOICE_CONTROL
 }
 
 sealed interface DashboardEvent {
