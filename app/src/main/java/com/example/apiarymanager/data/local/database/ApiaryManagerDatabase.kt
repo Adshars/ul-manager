@@ -32,7 +32,7 @@ import com.example.apiarymanager.data.local.entity.TreatmentEntity
         FeedingEntity::class,
         HivePhotoEntity::class
     ],
-    version = 7,   // v7: added hive_photos table
+    version = 8,   // v8: added email notification columns to tasks
     exportSchema = false
 )
 abstract class ApiaryManagerDatabase : RoomDatabase() {
@@ -76,6 +76,13 @@ abstract class ApiaryManagerDatabase : RoomDatabase() {
                 """.trimIndent())
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_hive_photos_hive_id` ON `hive_photos` (`hive_id`)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_hive_photos_inspection_id` ON `hive_photos` (`inspection_id`)")
+            }
+        }
+
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE tasks ADD COLUMN email_notification_enabled INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE tasks ADD COLUMN notification_at TEXT")
             }
         }
     }

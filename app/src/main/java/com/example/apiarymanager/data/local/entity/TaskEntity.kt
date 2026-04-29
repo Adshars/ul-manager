@@ -53,5 +53,12 @@ data class TaskEntity(
 
     /** Stored as epoch day */
     @ColumnInfo(name = "created_at")
-    val createdAt: Long
+    val createdAt: Long,
+
+    @ColumnInfo(name = "email_notification_enabled")
+    val emailNotificationEnabled: Boolean = false,
+
+    /** Stored as ISO-8601 string, e.g. "2025-06-01T09:00:00", nullable */
+    @ColumnInfo(name = "notification_at")
+    val notificationAt: String? = null
 )

@@ -1,6 +1,7 @@
 package com.example.apiarymanager.domain.model
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class Task(
     val id: Long = 0,
@@ -11,7 +12,9 @@ data class Task(
     val dueDate: LocalDate? = null,
     val priority: TaskPriority = TaskPriority.MEDIUM,
     val isCompleted: Boolean = false,
-    val createdAt: LocalDate = LocalDate.now()
+    val createdAt: LocalDate = LocalDate.now(),
+    val emailNotificationEnabled: Boolean = false,
+    val notificationAt: LocalDateTime? = null
 )
 
 enum class TaskPriority {
