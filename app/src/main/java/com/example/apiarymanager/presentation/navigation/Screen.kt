@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
 
 // ─── Main app ────────────────────────────────────────────────────────────────
 
-@Serializable data object DashboardRoute
+@Serializable data class DashboardRoute(val autoOpenAiPicker: Boolean = false)
 
 @Serializable data object ApiaryListRoute
 
@@ -86,3 +86,7 @@ import kotlinx.serialization.Serializable
     val hiveId: Long? = null,
     val taskId: Long? = null
 )
+
+// ─── AI Analysis ──────────────────────────────────────────────────────────────
+
+@Serializable data class AiAnalysisRoute(val hiveId: Long)

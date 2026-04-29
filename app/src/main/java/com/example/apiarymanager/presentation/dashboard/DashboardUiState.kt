@@ -31,14 +31,17 @@ enum class QuickActionType {
     NEW_INSPECTION,
     HARVEST,
     ADD_TASK,
-    MAP
+    MAP,
+    VOICE_CONTROL,
+    AI_ANALYSIS
 }
 
 sealed interface DashboardEvent {
     data class NavigateToHiveList(val apiaryId: Long) : DashboardEvent
-    data object NavigateToTaskForm : DashboardEvent
+    data class NavigateToTaskForm(val taskId: Long? = null) : DashboardEvent
     data class NavigateToInspectionForm(val hiveId: Long) : DashboardEvent
     data class NavigateToHarvestForm(val hiveId: Long) : DashboardEvent
     data object NavigateToHivesMap : DashboardEvent
+    data class NavigateToAiAnalysis(val hiveId: Long) : DashboardEvent
     data class ShowMessage(val message: String) : DashboardEvent
 }

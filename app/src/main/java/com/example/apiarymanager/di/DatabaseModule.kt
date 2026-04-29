@@ -44,7 +44,8 @@ object DatabaseModule {
             .addMigrations(
                 ApiaryManagerDatabase.MIGRATION_4_5,
                 ApiaryManagerDatabase.MIGRATION_5_6,
-                ApiaryManagerDatabase.MIGRATION_6_7
+                ApiaryManagerDatabase.MIGRATION_6_7,
+                ApiaryManagerDatabase.MIGRATION_7_8
             )
             .addCallback(object : androidx.room.RoomDatabase.Callback() {
                 override fun onOpen(db: SupportSQLiteDatabase) {

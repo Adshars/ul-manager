@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -80,7 +82,10 @@ class TaskFormViewModel @Inject constructor(
                         dueDate     = task.dueDate,
                         priority    = task.priority.name,
                         selectedApiaryId = task.apiaryId,
-                        selectedHiveId   = task.hiveId
+                        selectedHiveId   = task.hiveId,
+                        emailNotificationEnabled = task.emailNotificationEnabled,
+                        notificationDate = task.notificationAt?.toLocalDate(),
+                        notificationTime = task.notificationAt?.toLocalTime() ?: LocalTime.of(8, 0)
                     )
                 }
                 task.apiaryId?.let { loadHivesForApiary(it) }
@@ -101,6 +106,18 @@ class TaskFormViewModel @Inject constructor(
     fun onPriorityChange(v: String)    { _uiState.update { it.copy(priority = v) } }
     fun onBackClick()                  { viewModelScope.launch { _events.send(TaskFormEvent.NavigateBack) } }
 
+    fun onEmailNotificationToggle(enabled: Boolean) {
+        _uiState.update { it.copy(emailNotificationEnabled = enabled, notificationError = null) }
+    }
+
+    fun onNotificationDateChange(date: LocalDate?) {
+        _uiState.update { it.copy(notificationDate = date, notificationError = null) }
+    }
+
+    fun onNotificationTimeChange(time: LocalTime) {
+        _uiState.update { it.copy(notificationTime = time, notificationError = null) }
+    }
+
     fun onScopeChange(scope: TaskScope) {
         _uiState.update { it.copy(scope = scope, selectedApiaryId = null, selectedHiveId = null) }
     }
@@ -120,6 +137,13 @@ class TaskFormViewModel @Inject constructor(
             _uiState.update { it.copy(titleError = "Nazwa jest wymagana") }
             return
         }
+        if (state.emailNotificationEnabled && state.notificationDate == null) {
+            _uiState.update { it.copy(notificationError = "Wybierz datę powiadomienia") }
+            return
+        }
+        val notificationAt = if (state.emailNotificationEnabled && state.notificationDate != null) {
+            LocalDateTime.of(state.notificationDate, state.notificationTime)
+        } else null
         val task = Task(
             id          = taskId ?: 0,
             title       = state.title.trim(),
@@ -127,7 +151,9 @@ class TaskFormViewModel @Inject constructor(
             dueDate     = state.dueDate,
             priority    = runCatching { TaskPriority.valueOf(state.priority) }.getOrDefault(TaskPriority.MEDIUM),
             apiaryId    = if (state.scope == TaskScope.APIARY || state.scope == TaskScope.HIVE) state.selectedApiaryId else null,
-            hiveId      = if (state.scope == TaskScope.HIVE) state.selectedHiveId else null
+            hiveId      = if (state.scope == TaskScope.HIVE) state.selectedHiveId else null,
+            emailNotificationEnabled = state.emailNotificationEnabled,
+            notificationAt = notificationAt
         )
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }

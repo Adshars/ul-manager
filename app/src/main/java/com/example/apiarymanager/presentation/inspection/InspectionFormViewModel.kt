@@ -42,15 +42,6 @@ class InspectionFormViewModel @Inject constructor(
     init {
         if (inspectionId != null) loadExistingInspection(inspectionId)
         loadAvailableQueenYears()
-        // Pick up photo path returned from CameraScreen via SavedStateHandle
-        viewModelScope.launch {
-            savedStateHandle.getStateFlow<String?>("capturedPhotoPath", null).collect { path ->
-                if (!path.isNullOrBlank()) {
-                    onPhotoAdded(path)
-                    savedStateHandle.remove<String>("capturedPhotoPath")
-                }
-            }
-        }
     }
 
     // ─── Load for edit ────────────────────────────────────────────────────────
@@ -130,8 +121,8 @@ class InspectionFormViewModel @Inject constructor(
         _uiState.update { it.copy(photoPaths = it.photoPaths - path) }
     }
 
-    fun onPhotosFromGallery(uris: List<android.net.Uri>) {
-        _uiState.update { it.copy(photoPaths = it.photoPaths + uris.map { uri -> uri.toString() }) }
+    fun onPhotosFromGallery(paths: List<String>) {
+        _uiState.update { it.copy(photoPaths = it.photoPaths + paths) }
     }
 
     // ─── Save ─────────────────────────────────────────────────────────────────
