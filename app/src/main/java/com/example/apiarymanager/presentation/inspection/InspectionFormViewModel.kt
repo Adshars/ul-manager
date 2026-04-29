@@ -121,8 +121,8 @@ class InspectionFormViewModel @Inject constructor(
         _uiState.update { it.copy(photoPaths = it.photoPaths - path) }
     }
 
-    fun onPhotosFromGallery(uris: List<android.net.Uri>) {
-        _uiState.update { it.copy(photoPaths = it.photoPaths + uris.map { uri -> uri.toString() }) }
+    fun onPhotosFromGallery(paths: List<String>) {
+        _uiState.update { it.copy(photoPaths = it.photoPaths + paths) }
     }
 
     // ─── Save ─────────────────────────────────────────────────────────────────

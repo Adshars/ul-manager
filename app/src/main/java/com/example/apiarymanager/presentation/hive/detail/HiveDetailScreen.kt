@@ -45,7 +45,9 @@ import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -447,7 +449,25 @@ private fun PhotosTab(
         return
     }
 
-    var fullscreenPhoto by remember { mutableStateOf<HivePhoto?>(null) }
+    var fullscreenPhoto  by remember { mutableStateOf<HivePhoto?>(null) }
+    var photoToDelete    by remember { mutableStateOf<HivePhoto?>(null) }
+
+    photoToDelete?.let { photo ->
+        AlertDialog(
+            onDismissRequest = { photoToDelete = null },
+            title = { Text("Usuń zdjęcie") },
+            text  = { Text("Czy na pewno chcesz usunąć to zdjęcie? Tej operacji nie można cofnąć.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.onDeletePhoto(photo.id)
+                    photoToDelete = null
+                }) { Text("Usuń", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { photoToDelete = null }) { Text("Anuluj") }
+            }
+        )
+    }
 
     fullscreenPhoto?.let { photo ->
         Dialog(
@@ -514,7 +534,7 @@ private fun PhotosTab(
                         .padding(4.dp)
                         .size(24.dp)
                         .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(50))
-                        .clickable { viewModel.onDeletePhoto(photo.id) },
+                        .clickable { photoToDelete = photo },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
