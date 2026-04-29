@@ -110,8 +110,8 @@ fun AppNavGraph(
                 onNavigateToApiaryForm = {
                     navController.navigate(ApiaryFormRoute())
                 },
-                onNavigateToTaskForm = {
-                    navController.navigate(TaskFormRoute())
+                onNavigateToTaskForm = { taskId ->
+                    navController.navigate(TaskFormRoute(taskId = taskId))
                 },
                 onNavigateToInspectionForm = { hiveId ->
                     navController.navigate(InspectionFormRoute(hiveId = hiveId))

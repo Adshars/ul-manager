@@ -73,6 +73,10 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
+    fun onTaskClick(taskId: Long) {
+        viewModelScope.launch { _events.send(DashboardEvent.NavigateToTaskForm(taskId)) }
+    }
+
     fun onQuickActionClick(type: QuickActionType) {
         viewModelScope.launch {
             when (type) {
@@ -84,7 +88,7 @@ class DashboardViewModel @Inject constructor(
                         _pickerState.update { HivePickerState(isOpen = true, action = type) }
                     }
                 }
-                QuickActionType.ADD_TASK -> _events.send(DashboardEvent.NavigateToTaskForm)
+                QuickActionType.ADD_TASK -> _events.send(DashboardEvent.NavigateToTaskForm())
                 QuickActionType.MAP      -> _events.send(DashboardEvent.NavigateToHivesMap)
             }
         }

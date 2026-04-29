@@ -36,7 +36,7 @@ enum class QuickActionType {
 
 sealed interface DashboardEvent {
     data class NavigateToHiveList(val apiaryId: Long) : DashboardEvent
-    data object NavigateToTaskForm : DashboardEvent
+    data class NavigateToTaskForm(val taskId: Long? = null) : DashboardEvent
     data class NavigateToInspectionForm(val hiveId: Long) : DashboardEvent
     data class NavigateToHarvestForm(val hiveId: Long) : DashboardEvent
     data object NavigateToHivesMap : DashboardEvent
