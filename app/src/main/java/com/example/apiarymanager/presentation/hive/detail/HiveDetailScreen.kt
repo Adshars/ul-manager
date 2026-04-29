@@ -29,7 +29,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material3.BasicAlertDialog
+import android.view.ViewGroup
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -49,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -58,10 +59,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -432,7 +436,6 @@ private fun EmptyTabMessage(message: String, modifier: Modifier = Modifier) {
 
 // ─── Tab 6: Photos ────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PhotosTab(
     photos: List<HivePhoto>,
@@ -447,10 +450,21 @@ private fun PhotosTab(
     var fullscreenPhoto by remember { mutableStateOf<HivePhoto?>(null) }
 
     fullscreenPhoto?.let { photo ->
-        BasicAlertDialog(
+        Dialog(
             onDismissRequest = { fullscreenPhoto = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
+            // BasicAlertDialog/Dialog defaults to WRAP_CONTENT height — the window must be
+            // explicitly set to MATCH_PARENT so fillMaxSize() actually fills the screen,
+            // regardless of whether AsyncImage successfully loads the photo.
+            val dialogWindow = (LocalView.current.parent as? DialogWindowProvider)?.window
+            SideEffect {
+                dialogWindow?.setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()

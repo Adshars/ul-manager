@@ -42,15 +42,6 @@ class InspectionFormViewModel @Inject constructor(
     init {
         if (inspectionId != null) loadExistingInspection(inspectionId)
         loadAvailableQueenYears()
-        // Pick up photo path returned from CameraScreen via SavedStateHandle
-        viewModelScope.launch {
-            savedStateHandle.getStateFlow<String?>("capturedPhotoPath", null).collect { path ->
-                if (!path.isNullOrBlank()) {
-                    onPhotoAdded(path)
-                    savedStateHandle.remove<String>("capturedPhotoPath")
-                }
-            }
-        }
     }
 
     // ─── Load for edit ────────────────────────────────────────────────────────

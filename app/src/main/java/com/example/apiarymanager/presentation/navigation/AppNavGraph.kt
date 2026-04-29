@@ -1,11 +1,16 @@
 package com.example.apiarymanager.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.example.apiarymanager.presentation.inspection.InspectionFormViewModel
 import com.example.apiarymanager.presentation.apiary.ApiaryFormScreen
 import com.example.apiarymanager.presentation.apiary.ApiaryListScreen
 import com.example.apiarymanager.presentation.auth.forgotpassword.ForgotPasswordScreen
@@ -237,6 +242,21 @@ fun AppNavGraph(
 
         composable<InspectionFormRoute> { backStackEntry ->
             val route = backStackEntry.toRoute<InspectionFormRoute>()
+
+            // NavBackStackEntry.savedStateHandle and the ViewModel's SavedStateHandle are
+            // different objects. CameraScreen writes to the back-stack entry's handle, so
+            // we must observe here and forward the result to the ViewModel explicitly.
+            val viewModel: InspectionFormViewModel = hiltViewModel()
+            val capturedPath by backStackEntry.savedStateHandle
+                .getStateFlow<String?>("capturedPhotoPath", null)
+                .collectAsStateWithLifecycle()
+            LaunchedEffect(capturedPath) {
+                if (!capturedPath.isNullOrBlank()) {
+                    viewModel.onPhotoAdded(capturedPath!!)
+                    backStackEntry.savedStateHandle.remove<String>("capturedPhotoPath")
+                }
+            }
+
             InspectionFormScreen(
                 hiveId       = route.hiveId,
                 inspectionId = route.inspectionId,
@@ -254,10 +274,12 @@ fun AppNavGraph(
             CameraScreen(
                 outputDir = route.outputDir,
                 onPhotoTaken = { path ->
-                    // Pass result back to InspectionFormScreen via SavedStateHandle
+                    // CameraX delivers an absolute file path; convert to file:// URI so
+                    // it is handled uniformly alongside content:// gallery URIs downstream.
+                    val uri = android.net.Uri.fromFile(java.io.File(path)).toString()
                     navController.previousBackStackEntry
                         ?.savedStateHandle
-                        ?.set("capturedPhotoPath", path)
+                        ?.set("capturedPhotoPath", uri)
                     navController.popBackStack()
                 },
                 onNavigateBack = { navController.popBackStack() }
