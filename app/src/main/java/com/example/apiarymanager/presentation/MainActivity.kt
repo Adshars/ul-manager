@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.apiarymanager.core.security.PinManager
 import com.example.apiarymanager.presentation.navigation.AppDrawerContent
 import com.example.apiarymanager.presentation.navigation.AppNavGraph
+import com.example.apiarymanager.presentation.navigation.DashboardRoute
 import com.example.apiarymanager.presentation.navigation.HiveLocationRoute
 import com.example.apiarymanager.presentation.navigation.HivesMapRoute
 import com.example.apiarymanager.presentation.navigation.LoginRoute
@@ -75,11 +76,17 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onVoiceControl = {
-                                    scope.launch {
-                                        drawerState.close()
-                                        snackbarState.showSnackbar("Już niedługo funkcja będzie dostępna")
-                                    }
+                                scope.launch {
+                                    drawerState.close()
+                                    snackbarState.showSnackbar("Już niedługo funkcja będzie dostępna")
                                 }
+                            },
+                            onAiAnalysis = {
+                                scope.launch { drawerState.close() }
+                                navController.navigate(DashboardRoute(autoOpenAiPicker = true)) {
+                                    popUpTo<DashboardRoute> { inclusive = true }
+                                }
+                            }
                             )
                         }
                     ) {

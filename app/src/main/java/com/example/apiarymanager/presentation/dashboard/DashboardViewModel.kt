@@ -1,7 +1,10 @@
 package com.example.apiarymanager.presentation.dashboard
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import com.example.apiarymanager.presentation.navigation.DashboardRoute
 import com.example.apiarymanager.domain.model.Apiary
 import com.example.apiarymanager.domain.model.Task
 import com.example.apiarymanager.domain.repository.ApiaryRepository
@@ -29,6 +32,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val apiaryRepository: ApiaryRepository,
     private val hiveRepository: HiveRepository,
     private val taskRepository: TaskRepository
@@ -37,7 +41,12 @@ class DashboardViewModel @Inject constructor(
     private val _events = Channel<DashboardEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
-    private val _pickerState = MutableStateFlow(HivePickerState())
+    private val _pickerState = MutableStateFlow(
+        if (savedStateHandle.toRoute<DashboardRoute>().autoOpenAiPicker)
+            HivePickerState(isOpen = true, action = QuickActionType.AI_ANALYSIS)
+        else
+            HivePickerState()
+    )
 
     val uiState: StateFlow<DashboardUiState> = combine(
         apiariesWithCountsFlow(),
@@ -81,7 +90,8 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             when (type) {
                 QuickActionType.NEW_INSPECTION,
-                QuickActionType.HARVEST -> {
+                QuickActionType.HARVEST,
+                QuickActionType.AI_ANALYSIS -> {
                     if (uiState.value.apiaries.isEmpty()) {
                         _events.send(DashboardEvent.ShowMessage("Najpierw dodaj pasiekę"))
                     } else {
@@ -115,6 +125,7 @@ class DashboardViewModel @Inject constructor(
             when (action) {
                 QuickActionType.NEW_INSPECTION -> _events.send(DashboardEvent.NavigateToInspectionForm(hiveId))
                 QuickActionType.HARVEST        -> _events.send(DashboardEvent.NavigateToHarvestForm(hiveId))
+                QuickActionType.AI_ANALYSIS    -> _events.send(DashboardEvent.NavigateToAiAnalysis(hiveId))
                 else -> {}
             }
         }

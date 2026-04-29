@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Psychology
 import android.view.ViewGroup
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
@@ -95,6 +96,7 @@ fun HiveDetailScreen(
     onNavigateToTreatmentForm: (hiveId: Long, treatmentId: Long?) -> Unit,
     onNavigateToFeedingForm: (hiveId: Long, feedingId: Long?) -> Unit,
     onNavigateToTaskForm: (hiveId: Long, taskId: Long?) -> Unit,
+    onNavigateToAiAnalysis: (hiveId: Long) -> Unit,
     initialTab: Int = 0,
     viewModel: HiveDetailViewModel = hiltViewModel()
 ) {
@@ -123,6 +125,8 @@ fun HiveDetailScreen(
                     onNavigateToFeedingForm(event.hiveId, event.feedingId)
                 is HiveDetailEvent.NavigateToTaskForm ->
                     onNavigateToTaskForm(event.hiveId, event.taskId)
+                is HiveDetailEvent.NavigateToAiAnalysis ->
+                    onNavigateToAiAnalysis(event.hiveId)
                 is HiveDetailEvent.ShowMessage ->
                     snackbarHostState.showSnackbar(event.message)
             }
@@ -183,7 +187,7 @@ fun HiveDetailScreen(
         }
 
         when (selectedTab) {
-            0 -> HiveInfoTab(uiState, Modifier.padding(innerPadding))
+            0 -> HiveInfoTab(uiState, onAiAnalysis = viewModel::onAiAnalysisClick, modifier = Modifier.padding(innerPadding))
             1 -> InspectionsTab(uiState.inspections, viewModel, Modifier.padding(innerPadding))
             2 -> HarvestsTab(uiState.harvests, viewModel, Modifier.padding(innerPadding))
             3 -> TreatmentsTab(uiState.treatments, viewModel, Modifier.padding(innerPadding))
@@ -197,7 +201,7 @@ fun HiveDetailScreen(
 // ─── Tab 0: Hive info ─────────────────────────────────────────────────────────
 
 @Composable
-private fun HiveInfoTab(uiState: HiveDetailUiState, modifier: Modifier = Modifier) {
+private fun HiveInfoTab(uiState: HiveDetailUiState, onAiAnalysis: () -> Unit, modifier: Modifier = Modifier) {
     val hive = uiState.hive ?: return
     LazyColumn(modifier = modifier, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         item {
@@ -233,6 +237,17 @@ private fun HiveInfoTab(uiState: HiveDetailUiState, modifier: Modifier = Modifie
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Text(hive.notes, modifier = Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)
                 }
+            }
+        }
+
+        item {
+            Spacer(Modifier.height(8.dp))
+            androidx.compose.material3.Button(
+                onClick  = onAiAnalysis,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Outlined.Psychology, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                Text("Wyślij zdjęcie do analizy AI")
             }
         }
     }

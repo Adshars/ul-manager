@@ -30,6 +30,7 @@ import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.PlaylistAdd
+import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
@@ -83,6 +84,7 @@ fun DashboardScreen(
     onNavigateToInspectionForm: (hiveId: Long) -> Unit = {},
     onNavigateToHarvestForm: (hiveId: Long) -> Unit = {},
     onNavigateToHivesMap: () -> Unit = {},
+    onNavigateToAiAnalysis: (hiveId: Long) -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onOpenDrawer: () -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
@@ -98,6 +100,7 @@ fun DashboardScreen(
                 is DashboardEvent.NavigateToInspectionForm -> onNavigateToInspectionForm(event.hiveId)
                 is DashboardEvent.NavigateToHarvestForm    -> onNavigateToHarvestForm(event.hiveId)
                 DashboardEvent.NavigateToHivesMap          -> onNavigateToHivesMap()
+                is DashboardEvent.NavigateToAiAnalysis     -> onNavigateToAiAnalysis(event.hiveId)
                 is DashboardEvent.ShowMessage              -> snackbarHostState.showSnackbar(event.message)
             }
         }
@@ -343,7 +346,8 @@ private val quickActionItems = listOf(
     QuickActionItem(Icons.Outlined.WaterDrop,    "Miodo-\nbranie",   QuickActionType.HARVEST),
     QuickActionItem(Icons.Outlined.PlaylistAdd,  "Dodaj\nzadanie",   QuickActionType.ADD_TASK),
     QuickActionItem(Icons.Outlined.Map,          "Mapa\npasiek",     QuickActionType.MAP),
-    QuickActionItem(Icons.Outlined.Mic,          "Sterowanie\ngłosowe", QuickActionType.VOICE_CONTROL)
+    QuickActionItem(Icons.Outlined.Mic,          "Sterowanie\ngłosowe", QuickActionType.VOICE_CONTROL),
+    QuickActionItem(Icons.Outlined.Psychology,   "Analiza\nAI",         QuickActionType.AI_ANALYSIS)
 )
 
 @Composable

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +34,7 @@ private data class DrawerItem(
 )
 
 private val drawerItems = listOf(
-    DrawerItem(Icons.Filled.Home,          "Pulpit",       DashboardRoute),
+    DrawerItem(Icons.Filled.Home,          "Pulpit",       DashboardRoute()),
     DrawerItem(Icons.Filled.Hive,          "Pasieki",      ApiaryListRoute),
     DrawerItem(Icons.Outlined.CheckCircle, "Zadania",      TaskListRoute),
     DrawerItem(Icons.Filled.Map,           "Mapa pasiek",  HivesMapRoute),
@@ -47,6 +48,7 @@ fun AppDrawerContent(
     onNavigate: (Any) -> Unit,
     onLogout: () -> Unit,
     onVoiceControl: () -> Unit = {},
+    onAiAnalysis: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     ModalDrawerSheet(modifier = modifier.fillMaxHeight()) {
@@ -96,6 +98,13 @@ fun AppDrawerContent(
             label    = { Text("Sterowanie głosowe") },
             selected = false,
             onClick  = onVoiceControl,
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
+        NavigationDrawerItem(
+            icon     = { Icon(Icons.Outlined.Psychology, contentDescription = "Analiza AI") },
+            label    = { Text("Analiza AI") },
+            selected = false,
+            onClick  = onAiAnalysis,
             modifier = Modifier.padding(horizontal = 12.dp)
         )
 

@@ -10,6 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.example.apiarymanager.presentation.aianalysis.AiAnalysisScreen
 import com.example.apiarymanager.presentation.inspection.InspectionFormViewModel
 import com.example.apiarymanager.presentation.apiary.ApiaryFormScreen
 import com.example.apiarymanager.presentation.apiary.ApiaryListScreen
@@ -52,7 +53,7 @@ fun AppNavGraph(
         composable<LoginRoute> {
             LoginScreen(
                 onNavigateToDashboard = {
-                    navController.navigate(DashboardRoute) {
+                    navController.navigate(DashboardRoute()) {
                         popUpTo(LoginRoute) { inclusive = true }
                     }
                 },
@@ -64,7 +65,7 @@ fun AppNavGraph(
         composable<RegisterRoute> {
             RegisterScreen(
                 onNavigateToDashboard = {
-                    navController.navigate(DashboardRoute) {
+                    navController.navigate(DashboardRoute()) {
                         popUpTo(LoginRoute) { inclusive = true }
                     }
                 },
@@ -93,7 +94,7 @@ fun AppNavGraph(
         composable<OnboardingPinRoute> {
             PinScreen(
                 onNavigateToDashboard = {
-                    navController.navigate(DashboardRoute) {
+                    navController.navigate(DashboardRoute()) {
                         popUpTo(OnboardingPinRoute) { inclusive = true }
                     }
                 }
@@ -121,6 +122,9 @@ fun AppNavGraph(
                 },
                 onNavigateToHivesMap = {
                     navController.navigate(HivesMapRoute)
+                },
+                onNavigateToAiAnalysis = { hiveId ->
+                    navController.navigate(AiAnalysisRoute(hiveId))
                 },
                 onNavigateToSettings = {
                     navController.navigate(SettingsRoute)
@@ -226,6 +230,9 @@ fun AppNavGraph(
                 },
                 onNavigateToTaskForm = { hiveId, taskId ->
                     navController.navigate(TaskFormRoute(hiveId = hiveId, taskId = taskId))
+                },
+                onNavigateToAiAnalysis = { hiveId ->
+                    navController.navigate(AiAnalysisRoute(hiveId))
                 }
             )
         }
@@ -336,6 +343,14 @@ fun AppNavGraph(
 
         composable<HiveLocationRoute> {
             HiveLocationScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // ─── AI Analysis ─────────────────────────────────────────────────────
+
+        composable<AiAnalysisRoute> {
+            AiAnalysisScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

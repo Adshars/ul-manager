@@ -91,6 +91,7 @@ class HiveDetailViewModel @Inject constructor(
 
     fun onViewQrClick()       { send(HiveDetailEvent.NavigateToHiveQr(hiveId))       }
     fun onViewLocationClick() { send(HiveDetailEvent.NavigateToHiveLocation(hiveId)) }
+    fun onAiAnalysisClick()   { send(HiveDetailEvent.NavigateToAiAnalysis(hiveId))  }
 
     fun onAddInspection()          { send(HiveDetailEvent.NavigateToInspectionForm(hiveId, null)) }
     fun onEditInspection(id: Long) { send(HiveDetailEvent.NavigateToInspectionForm(hiveId, id))  }
