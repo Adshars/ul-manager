@@ -109,7 +109,7 @@ private fun LoginContent(
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "ApiaryManager",
+            text = "UL Manager",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary
         )
