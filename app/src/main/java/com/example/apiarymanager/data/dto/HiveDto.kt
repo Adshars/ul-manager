@@ -2,7 +2,7 @@ package com.example.apiarymanager.data.dto
 
 /**
  * DTO representing the API contract for a Hive.
- * [status] mirrors the C# enum name: "ACTIVE" | "WEAK" | "DEAD" | "SOLD"
+ * [status] mirrors the C# enum name: "ACTIVE" | "WEAK" | "DEAD"
  */
 data class HiveDto(
     val id: Long,

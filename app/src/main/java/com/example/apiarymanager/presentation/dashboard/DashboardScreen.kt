@@ -172,7 +172,7 @@ private fun DashboardTopBar(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text  = "ApiaryManager",
+                    text  = "UL Manager",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
