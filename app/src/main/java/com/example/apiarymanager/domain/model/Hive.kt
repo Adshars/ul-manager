@@ -22,13 +22,11 @@ data class Hive(
 enum class HiveStatus {
     ACTIVE,
     WEAK,
-    DEAD,
-    SOLD;
+    DEAD;
 
     fun displayName(): String = when (this) {
         ACTIVE -> "Aktywny"
         WEAK   -> "Słaby"
         DEAD   -> "Martwy"
-        SOLD   -> "Sprzedany"
     }
 }
