@@ -65,7 +65,7 @@ fun AppDrawerContent(
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text       = "ApiaryManager",
+            text       = "UL Manager",
             style      = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier   = Modifier.padding(horizontal = 28.dp)

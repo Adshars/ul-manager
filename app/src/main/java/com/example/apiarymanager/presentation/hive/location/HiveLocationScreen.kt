@@ -143,7 +143,7 @@ fun HiveLocationScreen(
             text  = {
                 Text(
                     "Uprawnienie do lokalizacji zostało trwale odrzucone.\n\n" +
-                    "Aby je włączyć:\nUstawienia → Aplikacje → ApiaryManager → Uprawnienia → Lokalizacja"
+                    "Aby je włączyć:\nUstawienia → Aplikacje → UL Manager → Uprawnienia → Lokalizacja"
                 )
             },
             confirmButton = {

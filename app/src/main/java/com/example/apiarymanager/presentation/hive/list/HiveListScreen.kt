@@ -213,7 +213,6 @@ private fun statusColor(status: HiveStatus) = when (status) {
     HiveStatus.ACTIVE -> MaterialTheme.colorScheme.primary
     HiveStatus.WEAK   -> MaterialTheme.colorScheme.secondary
     HiveStatus.DEAD   -> MaterialTheme.colorScheme.error
-    HiveStatus.SOLD   -> MaterialTheme.colorScheme.onSurfaceVariant
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
