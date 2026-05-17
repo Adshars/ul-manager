@@ -22,12 +22,16 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"https://am-dev-api.azurewebsites.net/api\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "API_BASE_URL", "\"https://am-dev-api.azurewebsites.net/api\"")
         }
     }
 
@@ -42,6 +46,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -77,8 +82,16 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // Serialization (required for @Serializable routes in Navigation Compose 2.8)
+    // Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // Retrofit + OkHttp
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.okhttp.logging)
+
+    // MSAL
+    implementation(libs.msal)
 
     // Vico charts
     implementation(libs.vico.compose.m3)
