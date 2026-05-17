@@ -5,6 +5,18 @@ import com.example.apiarymanager.data.local.entity.ApiaryEntity
 import com.example.apiarymanager.domain.model.Apiary
 import java.time.LocalDate
 
+// ─── DTO → Domain ────────────────────────────────────────────────────────────
+
+fun ApiaryDto.toDomain(): Apiary = Apiary(
+    id        = id,
+    name      = name,
+    location  = location,
+    latitude  = latitude,
+    longitude = longitude,
+    notes     = notes,
+    createdAt = createdAt.takeIf { it.isNotEmpty() }?.let { LocalDate.parse(it) } ?: LocalDate.now()
+)
+
 // ─── DTO → Entity ────────────────────────────────────────────────────────────
 
 fun ApiaryDto.toEntity(): ApiaryEntity = ApiaryEntity(
@@ -14,7 +26,7 @@ fun ApiaryDto.toEntity(): ApiaryEntity = ApiaryEntity(
     latitude  = latitude,
     longitude = longitude,
     notes     = notes,
-    createdAt = LocalDate.parse(createdAt).toEpochDay()
+    createdAt = createdAt.takeIf { it.isNotEmpty() }?.let { LocalDate.parse(it).toEpochDay() } ?: LocalDate.now().toEpochDay()
 )
 
 // ─── Entity → Domain ─────────────────────────────────────────────────────────

@@ -7,6 +7,29 @@ import com.example.apiarymanager.domain.model.ColonyStrength
 import com.example.apiarymanager.domain.model.Inspection
 import java.time.LocalDate
 
+// ─── DTO → Domain ────────────────────────────────────────────────────────────
+
+fun InspectionDto.toDomain(): Inspection = Inspection(
+    id               = id,
+    hiveId           = hiveId,
+    date             = LocalDate.parse(date),
+    queenSeen        = queenSeen,
+    broodSeen        = broodSeen,
+    queenCellsSeen   = queenCellsSeen,
+    broodCondition   = BroodCondition.valueOf(broodCondition),
+    colonyStrength   = ColonyStrength.valueOf(colonyStrength),
+    honeyStoresKg    = honeyStoresKg,
+    frameCount       = frameCount,
+    superboxesAdded  = superboxesAdded,
+    superboxesRemoved = superboxesRemoved,
+    dryCombFrames    = dryCombFrames,
+    foundationFrames = foundationFrames,
+    problems         = problems,
+    notes            = notes,
+    photoPaths       = emptyList(),
+    newQueenYear     = newQueenYear
+)
+
 // ─── DTO → Entity ────────────────────────────────────────────────────────────
 
 fun InspectionDto.toEntity(): InspectionEntity = InspectionEntity(

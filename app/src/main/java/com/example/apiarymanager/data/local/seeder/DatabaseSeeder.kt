@@ -55,15 +55,15 @@ object DatabaseSeeder {
     private suspend fun seedHives(db: ApiaryManagerDatabase) {
         val hives = listOf(
             // Pasieka Leśna (apiaryId = 1)
-            HiveDto(1, 1, 1, "Alfa",   2022, "ACTIVE", "Silna rodzina, dobra matka.",          "2022-04-20"),
-            HiveDto(2, 1, 2, "Beta",   2023, "ACTIVE", "Wzorowa produkcja miodu.",              "2022-05-01"),
-            HiveDto(3, 1, 3, "Gamma",  2021, "WEAK",   "Wymaga dokarmiania.",                  "2021-06-10"),
-            HiveDto(4, 1, 4, "Delta",  null, "ACTIVE", "Nowy rój z podziału Alfa.",             "2024-06-01"),
+            HiveDto(id = 1, apiaryId = 1, number = 1, name = "Alfa",   queenYear = 2022, status = "ACTIVE", notes = "Silna rodzina, dobra matka.",          installedAt = "2022-04-20"),
+            HiveDto(id = 2, apiaryId = 1, number = 2, name = "Beta",   queenYear = 2023, status = "ACTIVE", notes = "Wzorowa produkcja miodu.",              installedAt = "2022-05-01"),
+            HiveDto(id = 3, apiaryId = 1, number = 3, name = "Gamma",  queenYear = 2021, status = "WEAK",   notes = "Wymaga dokarmiania.",                  installedAt = "2021-06-10"),
+            HiveDto(id = 4, apiaryId = 1, number = 4, name = "Delta",  queenYear = null, status = "ACTIVE", notes = "Nowy rój z podziału Alfa.",             installedAt = "2024-06-01"),
             // Pasieka Ogrodowa (apiaryId = 2)
-            HiveDto(5, 2, 1, "Omega",  2023, "ACTIVE", "Łagodna rodzina, polecana do miasta.", "2023-03-25"),
-            HiveDto(6, 2, 2, "Sigma",  2022, "ACTIVE", "Dobra zbiórka nektaru.",               "2023-04-10"),
-            HiveDto(7, 2, 3, "Theta",  2021, "WEAK",   "Matka stara, planowa wymiana.",        "2023-04-10"),
-            HiveDto(8, 2, 4, "Lambda", null, "DEAD",   "Familia padła zimą 2023/2024.",        "2023-05-01")
+            HiveDto(id = 5, apiaryId = 2, number = 1, name = "Omega",  queenYear = 2023, status = "ACTIVE", notes = "Łagodna rodzina, polecana do miasta.", installedAt = "2023-03-25"),
+            HiveDto(id = 6, apiaryId = 2, number = 2, name = "Sigma",  queenYear = 2022, status = "ACTIVE", notes = "Dobra zbiórka nektaru.",               installedAt = "2023-04-10"),
+            HiveDto(id = 7, apiaryId = 2, number = 3, name = "Theta",  queenYear = 2021, status = "WEAK",   notes = "Matka stara, planowa wymiana.",        installedAt = "2023-04-10"),
+            HiveDto(id = 8, apiaryId = 2, number = 4, name = "Lambda", queenYear = null, status = "DEAD",   notes = "Familia padła zimą 2023/2024.",        installedAt = "2023-05-01")
         )
         db.hiveDao().insertAll(hives.map { it.toEntity() })
     }

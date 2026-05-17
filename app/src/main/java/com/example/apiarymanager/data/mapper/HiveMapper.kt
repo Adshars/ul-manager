@@ -6,18 +6,42 @@ import com.example.apiarymanager.domain.model.Hive
 import com.example.apiarymanager.domain.model.HiveStatus
 import java.time.LocalDate
 
+// ─── DTO → Domain ────────────────────────────────────────────────────────────
+
+fun HiveDto.toDomain(): Hive = Hive(
+    id            = id,
+    apiaryId      = apiaryId,
+    number        = number,
+    name          = name,
+    queenYear     = queenYear,
+    status        = HiveStatus.valueOf(status),
+    frameType     = frameType,
+    superboxCount = superboxCount,
+    queenOrigin   = queenOrigin,
+    notes         = notes,
+    installedAt   = installedAt.takeIf { it.isNotEmpty() }?.let { LocalDate.parse(it) } ?: LocalDate.now(),
+    qrCode        = qrCode,
+    latitude      = latitude,
+    longitude     = longitude
+)
+
 // ─── DTO → Entity ────────────────────────────────────────────────────────────
 
 fun HiveDto.toEntity(): HiveEntity = HiveEntity(
-    id          = id,
-    apiaryId    = apiaryId,
-    number      = number,
-    name        = name,
-    queenYear   = queenYear,
-    status      = status,
-    notes       = notes,
-    installedAt = LocalDate.parse(installedAt).toEpochDay(),
-    qrCode      = qrCode
+    id            = id,
+    apiaryId      = apiaryId,
+    number        = number,
+    name          = name,
+    queenYear     = queenYear,
+    status        = status,
+    frameType     = frameType,
+    superboxCount = superboxCount,
+    queenOrigin   = queenOrigin,
+    notes         = notes,
+    installedAt   = installedAt.takeIf { it.isNotEmpty() }?.let { LocalDate.parse(it).toEpochDay() } ?: 0L,
+    qrCode        = qrCode,
+    latitude      = latitude,
+    longitude     = longitude
 )
 
 // ─── Entity → Domain ─────────────────────────────────────────────────────────

@@ -7,6 +7,22 @@ import com.example.apiarymanager.domain.model.TaskPriority
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+// ─── DTO → Domain ────────────────────────────────────────────────────────────
+
+fun TaskDto.toDomain(): Task = Task(
+    id          = id,
+    apiaryId    = apiaryId,
+    hiveId      = hiveId,
+    title       = title,
+    description = description,
+    dueDate     = dueDate?.let { LocalDate.parse(it) },
+    priority    = TaskPriority.valueOf(priority),
+    isCompleted = isCompleted,
+    createdAt   = createdAt.takeIf { it.isNotEmpty() }?.let { LocalDate.parse(it) } ?: LocalDate.now(),
+    emailNotificationEnabled = emailNotificationEnabled,
+    notificationAt = notificationAt?.let { LocalDateTime.parse(it) }
+)
+
 // ─── DTO → Entity ────────────────────────────────────────────────────────────
 
 fun TaskDto.toEntity(): TaskEntity = TaskEntity(
@@ -18,7 +34,7 @@ fun TaskDto.toEntity(): TaskEntity = TaskEntity(
     dueDate     = dueDate?.let { LocalDate.parse(it).toEpochDay() },
     priority    = priority,
     isCompleted = isCompleted,
-    createdAt   = LocalDate.parse(createdAt).toEpochDay()
+    createdAt   = createdAt.takeIf { it.isNotEmpty() }?.let { LocalDate.parse(it).toEpochDay() } ?: LocalDate.now().toEpochDay()
 )
 
 // ─── Entity → Domain ─────────────────────────────────────────────────────────
