@@ -284,7 +284,7 @@ private fun GreetingHeader(modifier: Modifier = Modifier) {
             fontWeight = FontWeight.Bold
         )
         Text(
-            text  = "Sprawdź co czeka na Twoje pasieki",
+            text  = "Sprawdź co się dzieje w Twojej pasiece",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
