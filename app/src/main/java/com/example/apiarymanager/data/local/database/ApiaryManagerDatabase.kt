@@ -32,7 +32,7 @@ import com.example.apiarymanager.data.local.entity.TreatmentEntity
         FeedingEntity::class,
         HivePhotoEntity::class
     ],
-    version = 8,   // v8: added email notification columns to tasks
+    version = 9,   // v9: added remote_id and upload_status to hive_photos
     exportSchema = false
 )
 abstract class ApiaryManagerDatabase : RoomDatabase() {
@@ -83,6 +83,13 @@ abstract class ApiaryManagerDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE tasks ADD COLUMN email_notification_enabled INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE tasks ADD COLUMN notification_at TEXT")
+            }
+        }
+
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE hive_photos ADD COLUMN remote_id INTEGER")
+                db.execSQL("ALTER TABLE hive_photos ADD COLUMN upload_status TEXT NOT NULL DEFAULT 'PENDING'")
             }
         }
     }

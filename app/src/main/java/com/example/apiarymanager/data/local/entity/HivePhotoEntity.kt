@@ -29,5 +29,7 @@ data class HivePhotoEntity(
     @ColumnInfo(name = "hive_id")       val hiveId: Long,
     @ColumnInfo(name = "inspection_id") val inspectionId: Long?,
     @ColumnInfo(name = "local_path")    val localPath: String,
+    @ColumnInfo(name = "remote_id")     val remoteId: Long? = null,
+    @ColumnInfo(name = "upload_status") val uploadStatus: String = "PENDING",
     @ColumnInfo(name = "created_at")    val createdAt: String
 )

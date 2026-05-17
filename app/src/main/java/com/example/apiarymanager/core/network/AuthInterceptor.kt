@@ -11,13 +11,21 @@ class AuthInterceptor @Inject constructor(
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val token = runBlocking { tokenProvider.getToken() }
-        val request = if (token != null) {
-            chain.request().newBuilder()
-                .addHeader("Authorization", "Bearer $token")
-                .build()
-        } else {
-            chain.request()
+        val request = buildRequest(chain, token)
+        val response = chain.proceed(request)
+
+        if (response.code == 401 && token != null) {
+            response.close()
+            val freshToken = runBlocking { tokenProvider.getToken(forceRefresh = true) }
+            return chain.proceed(buildRequest(chain, freshToken))
         }
-        return chain.proceed(request)
+
+        return response
     }
+
+    private fun buildRequest(chain: Interceptor.Chain, token: String?) =
+        if (token != null)
+            chain.request().newBuilder().addHeader("Authorization", "Bearer $token").build()
+        else
+            chain.request()
 }

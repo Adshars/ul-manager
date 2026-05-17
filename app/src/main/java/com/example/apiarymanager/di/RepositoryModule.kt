@@ -1,7 +1,7 @@
 package com.example.apiarymanager.di
 
 import com.example.apiarymanager.data.repository.ApiaryRepositoryImpl
-import com.example.apiarymanager.data.repository.FakePhotoAnalysisRepositoryImpl
+import com.example.apiarymanager.data.repository.PhotoAnalysisRepositoryImpl
 import com.example.apiarymanager.data.repository.FeedingRepositoryImpl
 import com.example.apiarymanager.data.repository.HivePhotoRepositoryImpl
 import com.example.apiarymanager.data.repository.HiveRepositoryImpl
@@ -62,5 +62,5 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindPhotoAnalysisRepository(impl: FakePhotoAnalysisRepositoryImpl): PhotoAnalysisRepository
+    abstract fun bindPhotoAnalysisRepository(impl: PhotoAnalysisRepositoryImpl): PhotoAnalysisRepository
 }

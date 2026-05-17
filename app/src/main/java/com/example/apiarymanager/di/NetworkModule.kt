@@ -2,7 +2,7 @@ package com.example.apiarymanager.di
 
 import com.example.apiarymanager.BuildConfig
 import com.example.apiarymanager.core.network.AuthInterceptor
-import com.example.apiarymanager.core.network.NoOpTokenProvider
+import com.example.apiarymanager.core.network.MsalTokenProvider
 import com.example.apiarymanager.core.network.TokenProvider
 import com.example.apiarymanager.data.remote.api.ApiaryApi
 import com.example.apiarymanager.data.remote.api.AuthApi
@@ -33,7 +33,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideTokenProvider(): TokenProvider = NoOpTokenProvider()
+    fun provideTokenProvider(msalTokenProvider: MsalTokenProvider): TokenProvider = msalTokenProvider
 
     @Provides
     @Singleton

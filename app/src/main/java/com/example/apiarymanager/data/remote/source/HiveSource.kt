@@ -3,6 +3,7 @@ package com.example.apiarymanager.data.remote.source
 import com.example.apiarymanager.data.dto.CreateHiveRequest
 import com.example.apiarymanager.data.dto.UpdateHiveRequest
 import com.example.apiarymanager.data.mapper.toDomain
+import com.example.apiarymanager.data.remote.api.ApiaryApi
 import com.example.apiarymanager.data.remote.api.HiveApi
 import com.example.apiarymanager.domain.model.Hive
 import retrofit2.HttpException
@@ -13,9 +14,16 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class HiveSource @Inject constructor(private val api: HiveApi) {
+class HiveSource @Inject constructor(
+    private val api: HiveApi,
+    private val apiaryApi: ApiaryApi
+) {
 
     private val etags = ConcurrentHashMap<Long, String>()
+
+    suspend fun getByApiary(apiaryId: Long, page: Int = 1, pageSize: Int = 50): Result<List<Hive>> = safeCall {
+        apiaryApi.getHives(apiaryId, page, pageSize).items.map { it.toDomain() }
+    }
 
     suspend fun getById(id: Long): Result<Hive> = safeCall {
         val response = api.getById(id)

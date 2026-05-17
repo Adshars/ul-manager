@@ -65,9 +65,9 @@ class AiAnalysisViewModel @Inject constructor(
         viewModelScope.launch {
             val result = photoAnalysisRepository.analyzePhoto(
                 AnalysisRequest(
-                    photoPath = photo.localPath,
-                    note      = _uiState.value.note,
-                    type      = _uiState.value.analysisType
+                    photo = photo,
+                    note  = _uiState.value.note,
+                    type  = _uiState.value.analysisType
                 )
             )
             _uiState.update {
