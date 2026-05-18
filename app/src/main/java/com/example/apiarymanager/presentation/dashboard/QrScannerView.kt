@@ -68,7 +68,7 @@ fun QrScannerView(
     AndroidView(
         factory = { ctx ->
             val previewView = PreviewView(ctx).apply {
-                implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                implementationMode = PreviewView.ImplementationMode.PERFORMANCE
             }
             // AtomicBoolean lives in the factory closure — survives recompositions,
             // no Compose state overhead, thread-safe for the analyzer thread.

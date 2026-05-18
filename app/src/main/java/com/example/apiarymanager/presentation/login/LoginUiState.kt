@@ -6,6 +6,7 @@ data class LoginUiState(
 )
 
 sealed interface LoginEvent {
-    data object NavigateToDashboard : LoginEvent
-    data object NavigateToRegister : LoginEvent
+    data object NavigateToPinUnlock    : LoginEvent
+    data object NavigateToOnboardingPin : LoginEvent
+    data object NavigateToRegister     : LoginEvent
 }

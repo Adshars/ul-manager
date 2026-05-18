@@ -2,7 +2,6 @@ package com.example.apiarymanager.presentation.settings
 
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,14 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Fingerprint
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -44,10 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.apiarymanager.core.security.BiometricHelper
@@ -56,6 +49,7 @@ import com.example.apiarymanager.core.security.BiometricHelper
 @Composable
 fun SettingsScreen(
     onNavigateToLogin: () -> Unit,
+    onNavigateToChangePin: () -> Unit,
     onOpenDrawer: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -77,28 +71,18 @@ fun SettingsScreen(
     }
 
     LaunchedEffect(Unit) {
-        val available = (context as? FragmentActivity)?.let { BiometricHelper.isAvailable(it) } ?: false
+        val available = BiometricHelper.isAvailable(context)
         viewModel.onBiometricAvailabilityChanged(available)
     }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                SettingsEvent.NavigateToLogin -> onNavigateToLogin()
-                is SettingsEvent.ShowMessage  -> snackbarHostState.showSnackbar(event.message)
+                SettingsEvent.NavigateToLogin    -> onNavigateToLogin()
+                SettingsEvent.NavigateToChangePin -> onNavigateToChangePin()
+                is SettingsEvent.ShowMessage     -> snackbarHostState.showSnackbar(event.message)
             }
         }
-    }
-
-    if (uiState.showChangePasswordDialog) {
-        ChangePasswordDialog(
-            uiState                 = uiState,
-            onOldPasswordChange     = viewModel::onOldPasswordChange,
-            onNewPasswordChange     = viewModel::onNewPasswordChange,
-            onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
-            onConfirm               = viewModel::onConfirmChangePassword,
-            onDismiss               = viewModel::onDismissChangePassword
-        )
     }
 
     Scaffold(
@@ -140,10 +124,10 @@ fun SettingsScreen(
                     ) {
                         Icon(Icons.Filled.Lock, null, modifier = Modifier.size(24.dp))
                         Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                            Text("Zmień hasło", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                            Text("Ustaw nowe hasło dostępu do aplikacji", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Zmień PIN", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                            Text("Zmień 4-cyfrowy PIN dostępu do aplikacji", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                        OutlinedButton(onClick = viewModel::onChangePasswordClick) { Text("Zmień") }
+                        OutlinedButton(onClick = viewModel::onChangePinClick) { Text("Zmień") }
                     }
                 }
             }
@@ -196,68 +180,6 @@ fun SettingsScreen(
             )
         }
     }
-}
-
-@Composable
-private fun ChangePasswordDialog(
-    uiState: SettingsUiState,
-    onOldPasswordChange: (String) -> Unit,
-    onNewPasswordChange: (String) -> Unit,
-    onConfirmPasswordChange: (String) -> Unit,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Zmień hasło") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (uiState.isPinSet) {
-                    OutlinedTextField(
-                        value                = uiState.oldPassword,
-                        onValueChange        = onOldPasswordChange,
-                        label                = { Text("Stare hasło") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions      = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        singleLine           = true,
-                        modifier             = Modifier.fillMaxWidth()
-                    )
-                }
-                OutlinedTextField(
-                    value                = uiState.newPassword,
-                    onValueChange        = onNewPasswordChange,
-                    label                = { Text("Nowe hasło") },
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions      = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    singleLine           = true,
-                    modifier             = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value                = uiState.confirmPassword,
-                    onValueChange        = onConfirmPasswordChange,
-                    label                = { Text("Powtórz nowe hasło") },
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions      = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    singleLine           = true,
-                    isError              = uiState.passwordError != null,
-                    modifier             = Modifier.fillMaxWidth()
-                )
-                if (uiState.passwordError != null) {
-                    Text(
-                        text  = uiState.passwordError,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(onClick = onConfirm) { Text("Zmień") }
-        },
-        dismissButton = {
-            OutlinedButton(onClick = onDismiss) { Text("Anuluj") }
-        }
-    )
 }
 
 @Composable

@@ -4,16 +4,11 @@ data class SettingsUiState(
     val isBiometricEnabled: Boolean = false,
     val isBiometricAvailable: Boolean = false,
     val isDarkMode: Boolean = false,
-    val isPinSet: Boolean = false,
-    val isLoggingOut: Boolean = false,
-    val showChangePasswordDialog: Boolean = false,
-    val oldPassword: String = "",
-    val newPassword: String = "",
-    val confirmPassword: String = "",
-    val passwordError: String? = null
+    val isLoggingOut: Boolean = false
 )
 
 sealed interface SettingsEvent {
-    data object NavigateToLogin : SettingsEvent
-    data class ShowMessage(val message: String) : SettingsEvent
+    data object NavigateToLogin    : SettingsEvent
+    data object NavigateToChangePin : SettingsEvent
+    data class  ShowMessage(val message: String) : SettingsEvent
 }

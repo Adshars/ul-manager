@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,10 +45,8 @@ class HiveQrViewModel @Inject constructor(
             runCatching {
                 var hive = hiveRepository.getHiveById(hiveId).first()
                     ?: error("Hive not found")
-                // Hives created before QR feature have an empty qrCode — assign one now
                 if (hive.qrCode.isBlank()) {
-                    hive = hive.copy(qrCode = UUID.randomUUID().toString())
-                    hiveRepository.updateHive(hive)
+                    hive = hiveRepository.regenerateQr(hiveId)
                 }
                 hive to generateQrBitmap(hive.qrCode, 512)
             }
@@ -90,11 +87,8 @@ class HiveQrViewModel @Inject constructor(
         _uiState.update { it.copy(showRegenerateConfirm = false, isRegenerating = true) }
         viewModelScope.launch {
             runCatching {
-                val hive = hiveRepository.getHiveById(hiveId).first()
-                    ?: error("Hive not found")
-                val newCode = UUID.randomUUID().toString()
-                hiveRepository.updateHive(hive.copy(qrCode = newCode))
-                newCode to generateQrBitmap(newCode, 512)
+                val hive = hiveRepository.regenerateQr(hiveId)
+                hive.qrCode to generateQrBitmap(hive.qrCode, 512)
             }
                 .onSuccess { (newCode, bitmap) ->
                     _uiState.update {
