@@ -89,8 +89,10 @@ fun ApiaryFormScreen(
             OutlinedTextField(
                 value         = uiState.location,
                 onValueChange = viewModel::onLocationChange,
-                label         = { Text("Lokalizacja") },
+                label         = { Text("Lokalizacja *") },
                 placeholder   = { Text("np. Bory Tucholskie") },
+                isError       = uiState.locationError != null,
+                supportingText = uiState.locationError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } },
                 singleLine    = true,
                 modifier      = Modifier.fillMaxWidth()
             )

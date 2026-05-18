@@ -32,7 +32,7 @@ import com.example.apiarymanager.data.local.entity.TreatmentEntity
         FeedingEntity::class,
         HivePhotoEntity::class
     ],
-    version = 9,   // v9: added remote_id and upload_status to hive_photos
+    version = 10,  // v10: removed FK constraints from tasks (race condition on startup)
     exportSchema = false
 )
 abstract class ApiaryManagerDatabase : RoomDatabase() {
@@ -90,6 +90,35 @@ abstract class ApiaryManagerDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE hive_photos ADD COLUMN remote_id INTEGER")
                 db.execSQL("ALTER TABLE hive_photos ADD COLUMN upload_status TEXT NOT NULL DEFAULT 'PENDING'")
+            }
+        }
+
+        val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `tasks_new` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `apiary_id` INTEGER,
+                        `hive_id` INTEGER,
+                        `title` TEXT NOT NULL,
+                        `description` TEXT NOT NULL,
+                        `due_date` INTEGER,
+                        `priority` TEXT NOT NULL,
+                        `is_completed` INTEGER NOT NULL,
+                        `created_at` INTEGER NOT NULL,
+                        `email_notification_enabled` INTEGER NOT NULL DEFAULT 0,
+                        `notification_at` TEXT
+                    )
+                """.trimIndent())
+                db.execSQL("""
+                    INSERT INTO `tasks_new`
+                    SELECT `id`,`apiary_id`,`hive_id`,`title`,`description`,`due_date`,`priority`,`is_completed`,`created_at`,`email_notification_enabled`,`notification_at`
+                    FROM `tasks`
+                """.trimIndent())
+                db.execSQL("DROP TABLE `tasks`")
+                db.execSQL("ALTER TABLE `tasks_new` RENAME TO `tasks`")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_tasks_apiary_id` ON `tasks` (`apiary_id`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_tasks_hive_id` ON `tasks` (`hive_id`)")
             }
         }
     }

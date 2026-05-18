@@ -5,6 +5,7 @@ import com.example.apiarymanager.data.dto.UpdateTreatmentRequest
 import com.example.apiarymanager.data.mapper.toDomain
 import com.example.apiarymanager.data.remote.api.TreatmentApi
 import com.example.apiarymanager.domain.model.Treatment
+import com.example.apiarymanager.core.network.ApiException
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
@@ -62,7 +63,8 @@ class TreatmentSource @Inject constructor(private val api: TreatmentApi) {
     private suspend fun <T> safeCall(block: suspend () -> T): Result<T> = try {
         Result.success(block())
     } catch (e: HttpException) {
-        Result.failure(e)
+        val body = runCatching { e.response()?.errorBody()?.string() }.getOrNull()
+        Result.failure(ApiException(e.code(), body))
     } catch (e: IOException) {
         Result.failure(e)
     }

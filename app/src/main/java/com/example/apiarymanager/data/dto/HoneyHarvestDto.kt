@@ -1,5 +1,6 @@
 package com.example.apiarymanager.data.dto
 
+import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -18,7 +19,7 @@ data class CreateHoneyHarvestRequest(
     val date: String,
     val honeyType: String,
     val weightKg: Float,
-    val notes: String = ""
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val notes: String? = null
 )
 
 @Serializable
@@ -26,5 +27,5 @@ data class UpdateHoneyHarvestRequest(
     val date: String,
     val honeyType: String,
     val weightKg: Float,
-    val notes: String = ""
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val notes: String? = null
 )

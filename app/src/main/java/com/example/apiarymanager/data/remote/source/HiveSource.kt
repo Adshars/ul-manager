@@ -6,6 +6,7 @@ import com.example.apiarymanager.data.mapper.toDomain
 import com.example.apiarymanager.data.remote.api.ApiaryApi
 import com.example.apiarymanager.data.remote.api.HiveApi
 import com.example.apiarymanager.domain.model.Hive
+import com.example.apiarymanager.core.network.ApiException
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
@@ -80,7 +81,8 @@ class HiveSource @Inject constructor(
     private suspend fun <T> safeCall(block: suspend () -> T): Result<T> = try {
         Result.success(block())
     } catch (e: HttpException) {
-        Result.failure(e)
+        val body = runCatching { e.response()?.errorBody()?.string() }.getOrNull()
+        Result.failure(ApiException(e.code(), body))
     } catch (e: IOException) {
         Result.failure(e)
     }

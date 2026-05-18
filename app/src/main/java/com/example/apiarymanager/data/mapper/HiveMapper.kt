@@ -1,6 +1,9 @@
 package com.example.apiarymanager.data.mapper
 
+import com.example.apiarymanager.core.util.parseEnum
+import com.example.apiarymanager.data.dto.CreateHiveRequest
 import com.example.apiarymanager.data.dto.HiveDto
+import com.example.apiarymanager.data.dto.UpdateHiveRequest
 import com.example.apiarymanager.data.local.entity.HiveEntity
 import com.example.apiarymanager.domain.model.Hive
 import com.example.apiarymanager.domain.model.HiveStatus
@@ -14,7 +17,7 @@ fun HiveDto.toDomain(): Hive = Hive(
     number        = number,
     name          = name,
     queenYear     = queenYear,
-    status        = HiveStatus.valueOf(status),
+    status        = parseEnum(status, HiveStatus.ACTIVE),
     frameType     = frameType,
     superboxCount = superboxCount,
     queenOrigin   = queenOrigin,
@@ -52,7 +55,7 @@ fun HiveEntity.toDomain(): Hive = Hive(
     number        = number,
     name          = name,
     queenYear     = queenYear,
-    status        = HiveStatus.valueOf(status),
+    status        = parseEnum(status, HiveStatus.ACTIVE),
     frameType     = frameType,
     superboxCount = superboxCount,
     queenOrigin   = queenOrigin,
@@ -78,6 +81,35 @@ fun Hive.toEntity(): HiveEntity = HiveEntity(
     notes         = notes,
     installedAt   = installedAt.toEpochDay(),
     qrCode        = qrCode,
+    latitude      = latitude,
+    longitude     = longitude
+)
+
+fun Hive.toCreateRequest() = CreateHiveRequest(
+    apiaryId      = apiaryId,
+    number        = number,
+    name          = name,
+    status        = status.ordinal,
+    installedAt   = installedAt.toString(),
+    queenYear     = queenYear,
+    frameType     = frameType,
+    superboxCount = superboxCount,
+    queenOrigin   = queenOrigin.takeIf { it.isNotBlank() },
+    notes         = notes.takeIf { it.isNotBlank() },
+    latitude      = latitude,
+    longitude     = longitude
+)
+
+fun Hive.toUpdateRequest() = UpdateHiveRequest(
+    number        = number,
+    name          = name,
+    status        = status.ordinal,
+    installedAt   = installedAt.toString(),
+    queenYear     = queenYear,
+    frameType     = frameType,
+    superboxCount = superboxCount,
+    queenOrigin   = queenOrigin.takeIf { it.isNotBlank() },
+    notes         = notes.takeIf { it.isNotBlank() },
     latitude      = latitude,
     longitude     = longitude
 )

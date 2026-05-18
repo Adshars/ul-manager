@@ -12,14 +12,11 @@ import com.example.apiarymanager.data.local.dao.HoneyHarvestDao
 import com.example.apiarymanager.data.local.dao.InspectionDao
 import com.example.apiarymanager.data.local.dao.TaskDao
 import com.example.apiarymanager.data.local.dao.TreatmentDao
-import com.example.apiarymanager.data.local.seeder.DatabaseSeeder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
 @Module
@@ -29,14 +26,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(
-        @ApplicationContext context: Context,
-        @ApplicationScope appScope: CoroutineScope
-    ): ApiaryManagerDatabase {
-        // lateinit trick: the callback fires on first DB access (not at build() time),
-        // so `database` is guaranteed to be assigned before the lambda runs.
-        lateinit var database: ApiaryManagerDatabase
-
-        database = Room.databaseBuilder(
+        @ApplicationContext context: Context
+    ): ApiaryManagerDatabase =
+        Room.databaseBuilder(
             context,
             ApiaryManagerDatabase::class.java,
             ApiaryManagerDatabase.DATABASE_NAME
@@ -46,26 +38,16 @@ object DatabaseModule {
                 ApiaryManagerDatabase.MIGRATION_5_6,
                 ApiaryManagerDatabase.MIGRATION_6_7,
                 ApiaryManagerDatabase.MIGRATION_7_8,
-                ApiaryManagerDatabase.MIGRATION_8_9
+                ApiaryManagerDatabase.MIGRATION_8_9,
+                ApiaryManagerDatabase.MIGRATION_9_10
             )
             .addCallback(object : androidx.room.RoomDatabase.Callback() {
                 override fun onOpen(db: SupportSQLiteDatabase) {
                     super.onOpen(db)
                     db.execSQL("PRAGMA foreign_keys = ON")
                 }
-                override fun onCreate(db: SupportSQLiteDatabase) {
-                    super.onCreate(db)
-                    appScope.launch { DatabaseSeeder.seed(database) }
-                }
-                override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
-                    super.onDestructiveMigration(db)
-                    appScope.launch { DatabaseSeeder.seed(database) }
-                }
             })
             .build()
-
-        return database
-    }
 
     @Provides
     fun provideApiaryDao(db: ApiaryManagerDatabase): ApiaryDao = db.apiaryDao()

@@ -1,5 +1,6 @@
 package com.example.apiarymanager.data.dto
 
+import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.Serializable
 
 /** [priority] mirrors enum: "LOW" | "MEDIUM" | "HIGH" */
@@ -21,11 +22,11 @@ data class TaskDto(
 @Serializable
 data class CreateTaskRequest(
     val title: String,
-    val description: String = "",
-    val priority: String = "MEDIUM",
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val description: String? = null,
+    val priority: Int = 1,
     val apiaryId: Long? = null,
     val hiveId: Long? = null,
-    val dueDate: String? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val dueDate: String? = null,
     val emailNotificationEnabled: Boolean = false,
     val notificationAt: String? = null
 )
@@ -33,11 +34,11 @@ data class CreateTaskRequest(
 @Serializable
 data class UpdateTaskRequest(
     val title: String,
-    val description: String = "",
-    val priority: String = "MEDIUM",
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val description: String? = null,
+    val priority: Int = 1,
     val apiaryId: Long? = null,
     val hiveId: Long? = null,
-    val dueDate: String? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val dueDate: String? = null,
     val emailNotificationEnabled: Boolean = false,
     val notificationAt: String? = null
 )

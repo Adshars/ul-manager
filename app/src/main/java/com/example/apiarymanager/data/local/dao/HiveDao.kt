@@ -29,6 +29,12 @@ interface HiveDao {
     @Query("DELETE FROM hives WHERE id = :id")
     suspend fun deleteHive(id: Long)
 
+    @Query("DELETE FROM hives WHERE apiary_id = :apiaryId")
+    suspend fun deleteByApiary(apiaryId: Long)
+
+    @Query("DELETE FROM hives WHERE apiary_id = :apiaryId AND id NOT IN (:ids)")
+    suspend fun deleteNotIn(apiaryId: Long, ids: List<Long>)
+
     /** Active hives = ACTIVE + WEAK (not DEAD). Used by Dashboard counters. */
     @Query("SELECT COUNT(*) FROM hives WHERE apiary_id = :apiaryId AND status IN ('ACTIVE', 'WEAK')")
     fun getActiveHiveCount(apiaryId: Long): Flow<Int>

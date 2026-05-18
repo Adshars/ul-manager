@@ -36,4 +36,7 @@ interface FeedingDao {
 
     @Query("DELETE FROM feedings WHERE id = :id")
     suspend fun deleteFeeding(id: Long)
+
+    @Query("DELETE FROM feedings WHERE hive_id = :hiveId")
+    suspend fun deleteByHive(hiveId: Long)
 }

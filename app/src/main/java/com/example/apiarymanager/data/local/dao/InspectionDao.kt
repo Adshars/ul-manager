@@ -28,4 +28,7 @@ interface InspectionDao {
 
     @Query("DELETE FROM inspections WHERE id = :id")
     suspend fun deleteInspection(id: Long)
+
+    @Query("DELETE FROM inspections WHERE hive_id = :hiveId")
+    suspend fun deleteByHive(hiveId: Long)
 }

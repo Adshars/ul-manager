@@ -3,6 +3,7 @@ package com.example.apiarymanager.presentation.apiary
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.apiarymanager.core.util.toUserMessage
 import com.example.apiarymanager.domain.repository.ApiaryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -46,17 +47,23 @@ class ApiaryFormViewModel @Inject constructor(
         _uiState.update { it.copy(name = value, nameError = null) }
 
     fun onLocationChange(value: String) =
-        _uiState.update { it.copy(location = value) }
+        _uiState.update { it.copy(location = value, locationError = null) }
 
     fun onNotesChange(value: String) =
         _uiState.update { it.copy(notes = value) }
 
     fun onSaveClick() {
         val state = _uiState.value
+        var hasError = false
         if (state.name.isBlank()) {
             _uiState.update { it.copy(nameError = "Nazwa pasieki jest wymagana") }
-            return
+            hasError = true
         }
+        if (state.location.isBlank()) {
+            _uiState.update { it.copy(locationError = "Lokalizacja jest wymagana") }
+            hasError = true
+        }
+        if (hasError) return
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
             runCatching {
@@ -64,11 +71,12 @@ class ApiaryFormViewModel @Inject constructor(
                 if (state.apiaryId == null) apiaryRepository.insertApiary(apiary)
                 else apiaryRepository.updateApiary(apiary)
             }.onSuccess {
+                _events.send(ApiaryFormEvent.ShowMessage("Pasieka zapisana"))
                 _uiState.update { it.copy(isSaving = false) }
                 _events.send(ApiaryFormEvent.NavigateBack)
             }.onFailure { e ->
                 _uiState.update { it.copy(isSaving = false) }
-                _events.send(ApiaryFormEvent.ShowMessage("Błąd zapisu: ${e.message}"))
+                _events.send(ApiaryFormEvent.ShowMessage(e.toUserMessage()))
             }
         }
     }

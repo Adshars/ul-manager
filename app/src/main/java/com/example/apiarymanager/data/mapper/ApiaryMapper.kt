@@ -1,6 +1,8 @@
 package com.example.apiarymanager.data.mapper
 
 import com.example.apiarymanager.data.dto.ApiaryDto
+import com.example.apiarymanager.data.dto.CreateApiaryRequest
+import com.example.apiarymanager.data.dto.UpdateApiaryRequest
 import com.example.apiarymanager.data.local.entity.ApiaryEntity
 import com.example.apiarymanager.domain.model.Apiary
 import java.time.LocalDate
@@ -51,4 +53,20 @@ fun Apiary.toEntity(): ApiaryEntity = ApiaryEntity(
     longitude = longitude,
     notes     = notes,
     createdAt = createdAt.toEpochDay()
+)
+
+fun Apiary.toCreateRequest() = CreateApiaryRequest(
+    name      = name,
+    location  = location,
+    notes     = notes.takeIf { it.isNotBlank() },
+    latitude  = latitude,
+    longitude = longitude
+)
+
+fun Apiary.toUpdateRequest() = UpdateApiaryRequest(
+    name      = name,
+    location  = location,
+    notes     = notes.takeIf { it.isNotBlank() },
+    latitude  = latitude,
+    longitude = longitude
 )

@@ -1,5 +1,6 @@
 package com.example.apiarymanager.data.dto
 
+import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -17,16 +18,16 @@ data class ApiaryDto(
 data class CreateApiaryRequest(
     val name: String,
     val location: String,
-    val notes: String = "",
-    val latitude: Double? = null,
-    val longitude: Double? = null
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val notes: String? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val latitude: Double? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val longitude: Double? = null
 )
 
 @Serializable
 data class UpdateApiaryRequest(
     val name: String,
     val location: String,
-    val notes: String = "",
-    val latitude: Double? = null,
-    val longitude: Double? = null
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val notes: String? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val latitude: Double? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val longitude: Double? = null
 )

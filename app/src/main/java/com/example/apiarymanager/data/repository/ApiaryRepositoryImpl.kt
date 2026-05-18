@@ -1,8 +1,10 @@
 package com.example.apiarymanager.data.repository
 
 import com.example.apiarymanager.data.local.dao.ApiaryDao
+import com.example.apiarymanager.data.mapper.toCreateRequest
 import com.example.apiarymanager.data.mapper.toDomain
 import com.example.apiarymanager.data.mapper.toEntity
+import com.example.apiarymanager.data.mapper.toUpdateRequest
 import com.example.apiarymanager.data.remote.source.ApiarySource
 import com.example.apiarymanager.di.ApplicationScope
 import com.example.apiarymanager.domain.model.Apiary
@@ -31,15 +33,28 @@ class ApiaryRepositoryImpl @Inject constructor(
 
     override suspend fun refresh() {
         apiarySource.getAll()
-            .onSuccess { items -> dao.insertAll(items.map { it.toEntity() }) }
+            .onSuccess { items ->
+                val ids = items.map { it.id }
+                if (ids.isEmpty()) dao.deleteAll() else dao.deleteNotIn(ids)
+                dao.insertAll(items.map { it.toEntity() })
+            }
     }
 
-    override suspend fun insertApiary(apiary: Apiary): Long =
-        dao.insertApiary(apiary.toEntity())
+    override suspend fun insertApiary(apiary: Apiary): Long {
+        val server = apiarySource.create(apiary.toCreateRequest()).getOrThrow()
+        dao.insertApiary(server.toEntity())
+        return server.id
+    }
 
-    override suspend fun updateApiary(apiary: Apiary) =
-        dao.updateApiary(apiary.toEntity())
+    override suspend fun updateApiary(apiary: Apiary) {
+        apiarySource.getById(apiary.id).getOrThrow()
+        val server = apiarySource.update(apiary.id, apiary.toUpdateRequest()).getOrThrow()
+        dao.updateApiary(server.toEntity())
+    }
 
-    override suspend fun deleteApiary(id: Long) =
+    override suspend fun deleteApiary(id: Long) {
+        apiarySource.getById(id).getOrThrow()
+        apiarySource.delete(id).getOrThrow()
         dao.deleteApiary(id)
+    }
 }

@@ -38,8 +38,10 @@ class AiAnalysisViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            _uiState.update { it.copy(isUploading = true) }
+            runCatching { hivePhotoRepository.uploadPendingPhotos() }
             val photos = hivePhotoRepository.getPhotosByHive(hiveId).first()
-            _uiState.update { it.copy(photos = photos) }
+            _uiState.update { it.copy(photos = photos, isUploading = false) }
         }
     }
 

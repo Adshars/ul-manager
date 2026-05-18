@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.example.apiarymanager.core.util.toUserMessage
 import com.example.apiarymanager.domain.model.Hive
 import com.example.apiarymanager.domain.model.HiveStatus
 import com.example.apiarymanager.domain.repository.HiveRepository
@@ -120,10 +121,17 @@ class HiveFormViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            if (hiveId == null) hiveRepository.insertHive(hive)
-            else                hiveRepository.updateHive(hive)
-            _uiState.update { it.copy(isSaving = false) }
-            _events.send(HiveFormEvent.NavigateBack)
+            runCatching {
+                if (hiveId == null) hiveRepository.insertHive(hive)
+                else                hiveRepository.updateHive(hive)
+            }.onSuccess {
+                _events.send(HiveFormEvent.ShowMessage("Ul zapisany"))
+                _uiState.update { it.copy(isSaving = false) }
+                _events.send(HiveFormEvent.NavigateBack)
+            }.onFailure { e ->
+                _uiState.update { it.copy(isSaving = false) }
+                _events.send(HiveFormEvent.ShowMessage(e.toUserMessage()))
+            }
         }
     }
 }

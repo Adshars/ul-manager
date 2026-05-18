@@ -29,6 +29,12 @@ interface ApiaryDao {
     @Query("DELETE FROM apiaries WHERE id = :id")
     suspend fun deleteApiary(id: Long)
 
+    @Query("DELETE FROM apiaries")
+    suspend fun deleteAll()
+
+    @Query("DELETE FROM apiaries WHERE id NOT IN (:ids)")
+    suspend fun deleteNotIn(ids: List<Long>)
+
     @Query("SELECT COUNT(*) FROM apiaries")
     suspend fun count(): Int
 }

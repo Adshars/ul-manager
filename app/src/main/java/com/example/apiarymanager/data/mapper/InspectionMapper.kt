@@ -1,6 +1,9 @@
 package com.example.apiarymanager.data.mapper
 
+import com.example.apiarymanager.core.util.parseEnum
+import com.example.apiarymanager.data.dto.CreateInspectionRequest
 import com.example.apiarymanager.data.dto.InspectionDto
+import com.example.apiarymanager.data.dto.UpdateInspectionRequest
 import com.example.apiarymanager.data.local.entity.InspectionEntity
 import com.example.apiarymanager.domain.model.BroodCondition
 import com.example.apiarymanager.domain.model.ColonyStrength
@@ -16,8 +19,8 @@ fun InspectionDto.toDomain(): Inspection = Inspection(
     queenSeen        = queenSeen,
     broodSeen        = broodSeen,
     queenCellsSeen   = queenCellsSeen,
-    broodCondition   = BroodCondition.valueOf(broodCondition),
-    colonyStrength   = ColonyStrength.valueOf(colonyStrength),
+    broodCondition   = parseEnum(broodCondition, BroodCondition.GOOD),
+    colonyStrength   = parseEnum(colonyStrength, ColonyStrength.NORMAL),
     honeyStoresKg    = honeyStoresKg,
     frameCount       = frameCount,
     superboxesAdded  = superboxesAdded,
@@ -48,7 +51,8 @@ fun InspectionDto.toEntity(): InspectionEntity = InspectionEntity(
     dryCombFrames    = dryCombFrames,
     foundationFrames = foundationFrames,
     problems         = problems,
-    notes            = notes
+    notes            = notes,
+    newQueenYear     = newQueenYear
 )
 
 // ─── Entity → Domain ─────────────────────────────────────────────────────────
@@ -60,8 +64,8 @@ fun InspectionEntity.toDomain(): Inspection = Inspection(
     queenSeen        = queenSeen,
     broodSeen        = broodSeen,
     queenCellsSeen   = queenCellsSeen,
-    broodCondition   = BroodCondition.valueOf(broodCondition),
-    colonyStrength   = ColonyStrength.valueOf(colonyStrength),
+    broodCondition   = parseEnum(broodCondition, BroodCondition.GOOD),
+    colonyStrength   = parseEnum(colonyStrength, ColonyStrength.NORMAL),
     honeyStoresKg    = honeyStoresKg,
     frameCount       = frameCount,
     superboxesAdded  = superboxesAdded,
@@ -75,6 +79,43 @@ fun InspectionEntity.toDomain(): Inspection = Inspection(
 )
 
 // ─── Domain → Entity ─────────────────────────────────────────────────────────
+
+fun Inspection.toCreateRequest() = CreateInspectionRequest(
+    hiveId            = hiveId,
+    date              = date.toString(),
+    queenSeen         = queenSeen,
+    broodSeen         = broodSeen,
+    queenCellsSeen    = queenCellsSeen,
+    colonyStrength    = colonyStrength.ordinal,
+    broodCondition    = broodCondition.ordinal,
+    honeyStoresKg     = honeyStoresKg,
+    frameCount        = frameCount,
+    superboxesAdded   = superboxesAdded,
+    superboxesRemoved = superboxesRemoved,
+    dryCombFrames     = dryCombFrames,
+    foundationFrames  = foundationFrames,
+    problems          = problems.takeIf { it.isNotBlank() },
+    notes             = notes.takeIf { it.isNotBlank() },
+    newQueenYear      = newQueenYear
+)
+
+fun Inspection.toUpdateRequest() = UpdateInspectionRequest(
+    date              = date.toString(),
+    queenSeen         = queenSeen,
+    broodSeen         = broodSeen,
+    queenCellsSeen    = queenCellsSeen,
+    colonyStrength    = colonyStrength.ordinal,
+    broodCondition    = broodCondition.ordinal,
+    honeyStoresKg     = honeyStoresKg,
+    frameCount        = frameCount,
+    superboxesAdded   = superboxesAdded,
+    superboxesRemoved = superboxesRemoved,
+    dryCombFrames     = dryCombFrames,
+    foundationFrames  = foundationFrames,
+    problems          = problems.takeIf { it.isNotBlank() },
+    notes             = notes.takeIf { it.isNotBlank() },
+    newQueenYear      = newQueenYear
+)
 
 fun Inspection.toEntity(): InspectionEntity = InspectionEntity(
     id               = id,

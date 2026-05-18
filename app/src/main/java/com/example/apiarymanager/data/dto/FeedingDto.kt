@@ -1,5 +1,6 @@
 package com.example.apiarymanager.data.dto
 
+import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -18,7 +19,7 @@ data class CreateFeedingRequest(
     val date: String,
     val foodType: String,
     val weightKg: Float,
-    val applicationMethod: String = ""
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val applicationMethod: String? = null
 )
 
 @Serializable
@@ -26,5 +27,5 @@ data class UpdateFeedingRequest(
     val date: String,
     val foodType: String,
     val weightKg: Float,
-    val applicationMethod: String = ""
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val applicationMethod: String? = null
 )

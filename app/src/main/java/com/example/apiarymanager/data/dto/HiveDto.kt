@@ -1,5 +1,6 @@
 package com.example.apiarymanager.data.dto
 
+import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.Serializable
 
 /** [status] mirrors the C# enum name: "ACTIVE" | "WEAK" | "DEAD" */
@@ -26,28 +27,28 @@ data class CreateHiveRequest(
     val apiaryId: Long,
     val number: Int,
     val name: String,
-    val status: String = "ACTIVE",
+    val status: Int = 0,
     val installedAt: String,
-    val queenYear: Int? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val queenYear: Int? = null,
     val frameType: String = "Langstroth",
     val superboxCount: Int = 0,
-    val queenOrigin: String = "",
-    val notes: String = "",
-    val latitude: Double? = null,
-    val longitude: Double? = null
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val queenOrigin: String? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val notes: String? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val latitude: Double? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val longitude: Double? = null
 )
 
 @Serializable
 data class UpdateHiveRequest(
     val number: Int,
     val name: String,
-    val status: String,
+    val status: Int,
     val installedAt: String,
-    val queenYear: Int? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val queenYear: Int? = null,
     val frameType: String = "Langstroth",
     val superboxCount: Int = 0,
-    val queenOrigin: String = "",
-    val notes: String = "",
-    val latitude: Double? = null,
-    val longitude: Double? = null
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val queenOrigin: String? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val notes: String? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val latitude: Double? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val longitude: Double? = null
 )

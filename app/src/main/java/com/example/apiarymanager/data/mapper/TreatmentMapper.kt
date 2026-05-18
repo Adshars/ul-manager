@@ -1,6 +1,8 @@
 package com.example.apiarymanager.data.mapper
 
+import com.example.apiarymanager.data.dto.CreateTreatmentRequest
 import com.example.apiarymanager.data.dto.TreatmentDto
+import com.example.apiarymanager.data.dto.UpdateTreatmentRequest
 import com.example.apiarymanager.data.local.entity.TreatmentEntity
 import com.example.apiarymanager.domain.model.Treatment
 import java.time.LocalDate
@@ -49,4 +51,21 @@ fun Treatment.toEntity(): TreatmentEntity = TreatmentEntity(
     dosage                   = dosage,
     applicationMethod        = applicationMethod,
     mortalityAfterTreatment  = mortalityAfterTreatment
+)
+
+fun Treatment.toCreateRequest() = CreateTreatmentRequest(
+    hiveId                  = hiveId,
+    date                    = date.toString(),
+    medicineType            = medicineType,
+    dosage                  = dosage.takeIf { it.isNotBlank() },
+    applicationMethod       = applicationMethod.takeIf { it.isNotBlank() },
+    mortalityAfterTreatment = mortalityAfterTreatment.takeIf { it.isNotBlank() }
+)
+
+fun Treatment.toUpdateRequest() = UpdateTreatmentRequest(
+    date                    = date.toString(),
+    medicineType            = medicineType,
+    dosage                  = dosage.takeIf { it.isNotBlank() },
+    applicationMethod       = applicationMethod.takeIf { it.isNotBlank() },
+    mortalityAfterTreatment = mortalityAfterTreatment.takeIf { it.isNotBlank() }
 )

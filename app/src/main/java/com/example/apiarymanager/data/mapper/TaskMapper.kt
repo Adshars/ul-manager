@@ -1,6 +1,9 @@
 package com.example.apiarymanager.data.mapper
 
+import com.example.apiarymanager.core.util.parseEnum
+import com.example.apiarymanager.data.dto.CreateTaskRequest
 import com.example.apiarymanager.data.dto.TaskDto
+import com.example.apiarymanager.data.dto.UpdateTaskRequest
 import com.example.apiarymanager.data.local.entity.TaskEntity
 import com.example.apiarymanager.domain.model.Task
 import com.example.apiarymanager.domain.model.TaskPriority
@@ -16,7 +19,7 @@ fun TaskDto.toDomain(): Task = Task(
     title       = title,
     description = description,
     dueDate     = dueDate?.let { LocalDate.parse(it) },
-    priority    = TaskPriority.valueOf(priority),
+    priority    = parseEnum(priority, TaskPriority.MEDIUM),
     isCompleted = isCompleted,
     createdAt   = createdAt.takeIf { it.isNotEmpty() }?.let { LocalDate.parse(it) } ?: LocalDate.now(),
     emailNotificationEnabled = emailNotificationEnabled,
@@ -46,7 +49,7 @@ fun TaskEntity.toDomain(): Task = Task(
     title       = title,
     description = description,
     dueDate     = dueDate?.let { LocalDate.ofEpochDay(it) },
-    priority    = TaskPriority.valueOf(priority),
+    priority    = parseEnum(priority, TaskPriority.MEDIUM),
     isCompleted = isCompleted,
     createdAt   = LocalDate.ofEpochDay(createdAt),
     emailNotificationEnabled = emailNotificationEnabled,
@@ -67,4 +70,26 @@ fun Task.toEntity(): TaskEntity = TaskEntity(
     createdAt   = createdAt.toEpochDay(),
     emailNotificationEnabled = emailNotificationEnabled,
     notificationAt = notificationAt?.toString()
+)
+
+fun Task.toCreateRequest() = CreateTaskRequest(
+    title                    = title,
+    description              = description.takeIf { it.isNotBlank() },
+    priority                 = priority.ordinal,
+    apiaryId                 = apiaryId,
+    hiveId                   = hiveId,
+    dueDate                  = dueDate?.toString(),
+    emailNotificationEnabled = emailNotificationEnabled,
+    notificationAt           = notificationAt?.toString()
+)
+
+fun Task.toUpdateRequest() = UpdateTaskRequest(
+    title                    = title,
+    description              = description.takeIf { it.isNotBlank() },
+    priority                 = priority.ordinal,
+    apiaryId                 = apiaryId,
+    hiveId                   = hiveId,
+    dueDate                  = dueDate?.toString(),
+    emailNotificationEnabled = emailNotificationEnabled,
+    notificationAt           = notificationAt?.toString()
 )

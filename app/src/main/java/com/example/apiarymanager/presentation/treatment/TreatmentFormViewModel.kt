@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.example.apiarymanager.core.util.toUserMessage
 import com.example.apiarymanager.domain.model.Treatment
 import com.example.apiarymanager.domain.repository.TreatmentRepository
 import com.example.apiarymanager.presentation.navigation.TreatmentFormRoute
@@ -61,9 +62,16 @@ class TreatmentFormViewModel @Inject constructor(
         )
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            if (treatmentId == null) repository.insertTreatment(treatment)
-            else                     repository.updateTreatment(treatment)
-            _events.send(TreatmentFormEvent.NavigateBack)
+            runCatching {
+                if (treatmentId == null) repository.insertTreatment(treatment)
+                else                     repository.updateTreatment(treatment)
+            }.onSuccess {
+                _events.send(TreatmentFormEvent.ShowMessage("Leczenie zapisane"))
+                _events.send(TreatmentFormEvent.NavigateBack)
+            }.onFailure { e ->
+                _uiState.update { it.copy(isSaving = false) }
+                _events.send(TreatmentFormEvent.ShowMessage(e.toUserMessage()))
+            }
         }
     }
 }

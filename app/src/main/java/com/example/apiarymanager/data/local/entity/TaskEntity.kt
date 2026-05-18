@@ -2,26 +2,11 @@ package com.example.apiarymanager.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "tasks",
-    foreignKeys = [
-        ForeignKey(
-            entity = ApiaryEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["apiary_id"],
-            onDelete = ForeignKey.SET_NULL
-        ),
-        ForeignKey(
-            entity = HiveEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["hive_id"],
-            onDelete = ForeignKey.SET_NULL
-        )
-    ],
     indices = [Index("apiary_id"), Index("hive_id")]
 )
 data class TaskEntity(

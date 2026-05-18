@@ -12,7 +12,8 @@ data class AiAnalysisUiState(
     val note: String = "",
     val analysisType: AnalysisType = AnalysisType.FIND_QUEEN,
     val resultMessage: String = "",
-    val isSuccess: Boolean = false
+    val isSuccess: Boolean = false,
+    val isUploading: Boolean = false
 )
 
 sealed interface AiAnalysisEvent {
