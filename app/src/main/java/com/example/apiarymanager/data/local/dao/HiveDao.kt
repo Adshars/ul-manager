@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 import com.example.apiarymanager.data.local.entity.HiveEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -20,7 +21,7 @@ interface HiveDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHive(hive: HiveEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun insertAll(hives: List<HiveEntity>)
 
     @Update

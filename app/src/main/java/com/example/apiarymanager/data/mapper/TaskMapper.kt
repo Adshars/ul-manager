@@ -74,7 +74,7 @@ fun Task.toEntity(): TaskEntity = TaskEntity(
 
 fun Task.toCreateRequest() = CreateTaskRequest(
     title                    = title,
-    description              = description.takeIf { it.isNotBlank() },
+    description              = description,
     priority                 = priority.ordinal,
     apiaryId                 = apiaryId,
     hiveId                   = hiveId,
@@ -85,7 +85,7 @@ fun Task.toCreateRequest() = CreateTaskRequest(
 
 fun Task.toUpdateRequest() = UpdateTaskRequest(
     title                    = title,
-    description              = description.takeIf { it.isNotBlank() },
+    description              = description,
     priority                 = priority.ordinal,
     apiaryId                 = apiaryId,
     hiveId                   = hiveId,

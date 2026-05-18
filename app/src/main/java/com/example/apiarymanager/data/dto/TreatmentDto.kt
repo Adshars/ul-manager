@@ -19,8 +19,8 @@ data class CreateTreatmentRequest(
     val hiveId: Long,
     val date: String,
     val medicineType: String,
-    @EncodeDefault(EncodeDefault.Mode.NEVER) val dosage: String? = null,
-    @EncodeDefault(EncodeDefault.Mode.NEVER) val applicationMethod: String? = null,
+    val dosage: String,
+    val applicationMethod: String,
     @EncodeDefault(EncodeDefault.Mode.NEVER) val mortalityAfterTreatment: String? = null
 )
 
@@ -28,7 +28,7 @@ data class CreateTreatmentRequest(
 data class UpdateTreatmentRequest(
     val date: String,
     val medicineType: String,
-    @EncodeDefault(EncodeDefault.Mode.NEVER) val dosage: String? = null,
-    @EncodeDefault(EncodeDefault.Mode.NEVER) val applicationMethod: String? = null,
+    val dosage: String,
+    val applicationMethod: String,
     @EncodeDefault(EncodeDefault.Mode.NEVER) val mortalityAfterTreatment: String? = null
 )

@@ -57,15 +57,15 @@ fun Treatment.toCreateRequest() = CreateTreatmentRequest(
     hiveId                  = hiveId,
     date                    = date.toString(),
     medicineType            = medicineType,
-    dosage                  = dosage.takeIf { it.isNotBlank() },
-    applicationMethod       = applicationMethod.takeIf { it.isNotBlank() },
+    dosage                  = dosage,
+    applicationMethod       = applicationMethod,
     mortalityAfterTreatment = mortalityAfterTreatment.takeIf { it.isNotBlank() }
 )
 
 fun Treatment.toUpdateRequest() = UpdateTreatmentRequest(
     date                    = date.toString(),
     medicineType            = medicineType,
-    dosage                  = dosage.takeIf { it.isNotBlank() },
-    applicationMethod       = applicationMethod.takeIf { it.isNotBlank() },
+    dosage                  = dosage,
+    applicationMethod       = applicationMethod,
     mortalityAfterTreatment = mortalityAfterTreatment.takeIf { it.isNotBlank() }
 )

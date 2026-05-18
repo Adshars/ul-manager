@@ -126,7 +126,6 @@ class HiveFormViewModel @Inject constructor(
                 else                hiveRepository.updateHive(hive)
             }.onSuccess {
                 _events.send(HiveFormEvent.ShowMessage("Ul zapisany"))
-                _uiState.update { it.copy(isSaving = false) }
                 _events.send(HiveFormEvent.NavigateBack)
             }.onFailure { e ->
                 _uiState.update { it.copy(isSaving = false) }

@@ -134,7 +134,6 @@ class InspectionFormViewModel @Inject constructor(
             runCatching { saveInspectionUseCase(uiState.value.toInspection()) }
                 .onSuccess {
                     _events.send(InspectionFormEvent.ShowMessage("Przegląd zapisany"))
-                    _uiState.update { it.copy(isSaving = false) }
                     _events.send(InspectionFormEvent.NavigateBack)
                 }
                 .onFailure { e ->

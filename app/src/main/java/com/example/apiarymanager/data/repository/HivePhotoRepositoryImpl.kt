@@ -1,5 +1,6 @@
 package com.example.apiarymanager.data.repository
 
+import android.net.Uri
 import com.example.apiarymanager.data.local.dao.HivePhotoDao
 import com.example.apiarymanager.data.local.entity.HivePhotoEntity
 import com.example.apiarymanager.data.mapper.toDomain
@@ -47,7 +48,12 @@ class HivePhotoRepositoryImpl @Inject constructor(
 
     override suspend fun uploadPendingPhotos() {
         dao.getPendingPhotos().forEach { photo ->
-            val file = File(photo.localPath)
+            val filePath = if (photo.localPath.startsWith("file://")) {
+                Uri.parse(photo.localPath).path ?: return@forEach
+            } else {
+                photo.localPath
+            }
+            val file = File(filePath)
             if (!file.exists()) return@forEach
             val part = MultipartBody.Part.createFormData(
                 "file", file.name,

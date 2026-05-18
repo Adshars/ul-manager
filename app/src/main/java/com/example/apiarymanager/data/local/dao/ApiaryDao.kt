@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 import com.example.apiarymanager.data.local.entity.ApiaryEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -20,7 +21,7 @@ interface ApiaryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertApiary(apiary: ApiaryEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun insertAll(apiaries: List<ApiaryEntity>)
 
     @Update

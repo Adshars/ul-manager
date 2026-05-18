@@ -47,17 +47,6 @@ class HiveDetailViewModel @Inject constructor(
     private val _events = Channel<HiveDetailEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
-    init {
-        viewModelScope.launch {
-            runCatching {
-                inspectionRepository.refreshByHive(hiveId)
-                harvestRepository.refreshByHive(hiveId)
-                treatmentRepository.refreshByHive(hiveId)
-                feedingRepository.refreshByHive(hiveId)
-            }
-        }
-    }
-
     // Combine activities into one intermediate flow
     private val activitiesFlow = combine(
         inspectionRepository.getInspectionsByHive(hiveId),

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -169,12 +170,21 @@ fun SettingsScreen(
             SectionTitle("Konto")
             Button(
                 onClick  = viewModel::onLogout,
+                enabled  = !uiState.isLoggingOut,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 colors   = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
-                Icon(Icons.Filled.ExitToApp, null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.size(8.dp))
-                Text("Wyloguj się", style = MaterialTheme.typography.titleMedium)
+                if (uiState.isLoggingOut) {
+                    CircularProgressIndicator(
+                        color       = MaterialTheme.colorScheme.onError,
+                        strokeWidth = 2.dp,
+                        modifier    = Modifier.size(24.dp)
+                    )
+                } else {
+                    Icon(Icons.Filled.ExitToApp, null, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.size(8.dp))
+                    Text("Wyloguj się", style = MaterialTheme.typography.titleMedium)
+                }
             }
 
             Spacer(Modifier.weight(1f))

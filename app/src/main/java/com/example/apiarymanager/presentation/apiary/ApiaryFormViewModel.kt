@@ -72,7 +72,6 @@ class ApiaryFormViewModel @Inject constructor(
                 else apiaryRepository.updateApiary(apiary)
             }.onSuccess {
                 _events.send(ApiaryFormEvent.ShowMessage("Pasieka zapisana"))
-                _uiState.update { it.copy(isSaving = false) }
                 _events.send(ApiaryFormEvent.NavigateBack)
             }.onFailure { e ->
                 _uiState.update { it.copy(isSaving = false) }

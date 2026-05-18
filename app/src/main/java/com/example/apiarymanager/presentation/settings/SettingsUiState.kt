@@ -5,6 +5,7 @@ data class SettingsUiState(
     val isBiometricAvailable: Boolean = false,
     val isDarkMode: Boolean = false,
     val isPinSet: Boolean = false,
+    val isLoggingOut: Boolean = false,
     val showChangePasswordDialog: Boolean = false,
     val oldPassword: String = "",
     val newPassword: String = "",

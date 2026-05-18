@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 @HiltViewModel
@@ -96,8 +97,10 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onLogout() {
+        if (_uiState.value.isLoggingOut) return
         viewModelScope.launch {
-            msalAuthManager.signOut()
+            _uiState.update { it.copy(isLoggingOut = true) }
+            withTimeoutOrNull(5_000) { msalAuthManager.signOut() }
             pinManager.isOnboardingDone = false
             _events.send(SettingsEvent.NavigateToLogin)
         }
