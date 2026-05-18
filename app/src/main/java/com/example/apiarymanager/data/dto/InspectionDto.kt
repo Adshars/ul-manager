@@ -1,31 +1,66 @@
 package com.example.apiarymanager.data.dto
 
-/**
- * DTO representing the API contract for an Inspection.
- * New fields use default values so existing seeder call-sites compile unchanged.
- *
- * [broodCondition]  — "EXCELLENT" | "GOOD" | "FAIR" | "POOR" | "NONE"
- * [colonyStrength]  — "CRITICAL" | "WEAK" | "NORMAL" | "STRONG" | "VERY_STRONG"
- */
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class InspectionDto(
     val id: Long,
     val hiveId: Long,
-    val date: String,               // ISO-8601
-    // Observations
-    val queenSeen: Boolean,
+    val date: String,
+    val queenSeen: Boolean = false,
     val broodSeen: Boolean = false,
     val queenCellsSeen: Boolean = false,
-    // Colony condition
-    val broodCondition: String,
     val colonyStrength: String = "NORMAL",
-    val honeyStoresKg: Float,
-    val frameCount: Int,
-    // Frame management
+    val broodCondition: String = "GOOD",
+    val honeyStoresKg: Float = 0f,
+    val frameCount: Int = 0,
     val superboxesAdded: Int = 0,
     val superboxesRemoved: Int = 0,
     val dryCombFrames: Int = 0,
     val foundationFrames: Int = 0,
-    // Free text
     val problems: String = "",
-    val notes: String
+    val notes: String = "",
+    val newQueenYear: Int? = null
+)
+
+@Serializable
+data class CreateInspectionRequest(
+    val hiveId: Long,
+    val date: String,
+    val queenSeen: Boolean = false,
+    val broodSeen: Boolean = false,
+    val queenCellsSeen: Boolean = false,
+    val colonyStrength: Int = 2,
+    val broodCondition: Int = 1,
+    val honeyStoresKg: Float = 0f,
+    val frameCount: Int = 0,
+    val superboxesAdded: Int = 0,
+    val superboxesRemoved: Int = 0,
+    val dryCombFrames: Int = 0,
+    val foundationFrames: Int = 0,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val problems: String? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val notes: String? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val newQueenYear: Int? = null,
+    val photoIds: List<Long> = emptyList()
+)
+
+@Serializable
+data class UpdateInspectionRequest(
+    val date: String,
+    val queenSeen: Boolean = false,
+    val broodSeen: Boolean = false,
+    val queenCellsSeen: Boolean = false,
+    val colonyStrength: Int = 2,
+    val broodCondition: Int = 1,
+    val honeyStoresKg: Float = 0f,
+    val frameCount: Int = 0,
+    val superboxesAdded: Int = 0,
+    val superboxesRemoved: Int = 0,
+    val dryCombFrames: Int = 0,
+    val foundationFrames: Int = 0,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val problems: String? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val notes: String? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val newQueenYear: Int? = null,
+    val photoIds: List<Long> = emptyList()
 )

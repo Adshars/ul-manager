@@ -9,4 +9,5 @@ interface TreatmentRepository {
     suspend fun insertTreatment(treatment: Treatment): Long
     suspend fun updateTreatment(treatment: Treatment)
     suspend fun deleteTreatment(id: Long)
+    suspend fun refreshByHive(hiveId: Long)
 }

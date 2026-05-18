@@ -3,6 +3,7 @@ package com.example.apiarymanager.presentation.inspection
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.apiarymanager.core.util.toUserMessage
 import com.example.apiarymanager.domain.model.ColonyStrength
 import com.example.apiarymanager.domain.repository.HiveRepository
 import com.example.apiarymanager.domain.repository.InspectionRepository
@@ -132,12 +133,12 @@ class InspectionFormViewModel @Inject constructor(
             _uiState.update { it.copy(isSaving = true) }
             runCatching { saveInspectionUseCase(uiState.value.toInspection()) }
                 .onSuccess {
-                    _uiState.update { it.copy(isSaving = false) }
+                    _events.send(InspectionFormEvent.ShowMessage("Przegląd zapisany"))
                     _events.send(InspectionFormEvent.NavigateBack)
                 }
                 .onFailure { e ->
                     _uiState.update { it.copy(isSaving = false) }
-                    _events.send(InspectionFormEvent.ShowMessage("Błąd zapisu: ${e.message}"))
+                    _events.send(InspectionFormEvent.ShowMessage(e.toUserMessage()))
                 }
         }
     }

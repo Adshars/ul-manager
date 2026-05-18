@@ -32,6 +32,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -71,12 +73,16 @@ fun TaskFormScreen(
     viewModel: TaskFormViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
     var showDatePicker by remember { mutableStateOf(false) }
     var showNotificationDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.events.collect { when (it) { TaskFormEvent.NavigateBack -> onNavigateBack() } }
+        viewModel.events.collect { when (it) {
+            TaskFormEvent.NavigateBack           -> onNavigateBack()
+            is TaskFormEvent.ShowMessage         -> snackbarHostState.showSnackbar(it.message)
+        } }
     }
 
     if (showDatePicker) {
@@ -148,7 +154,8 @@ fun TaskFormScreen(
                 title = { Text(if (viewModel.uiState.value.isSaving) "Zapisywanie…" else "Zadanie") },
                 navigationIcon = { IconButton(onClick = viewModel::onBackClick) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) } }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(innerPadding).verticalScroll(rememberScrollState()).imePadding().padding(16.dp)

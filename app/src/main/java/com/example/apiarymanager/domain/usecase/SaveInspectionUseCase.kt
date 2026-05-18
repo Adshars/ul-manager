@@ -33,6 +33,8 @@ class SaveInspectionUseCase @Inject constructor(
             paths        = inspection.photoPaths
         )
 
+        runCatching { hivePhotoRepository.uploadPendingPhotos() }
+
         return savedId
     }
 }

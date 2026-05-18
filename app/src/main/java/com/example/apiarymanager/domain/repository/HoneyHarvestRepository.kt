@@ -10,4 +10,5 @@ interface HoneyHarvestRepository {
     suspend fun updateHarvest(harvest: HoneyHarvest)
     suspend fun deleteHarvest(id: Long)
     fun getTotalHarvestKgByApiary(apiaryId: Long): Flow<Float>
+    suspend fun refreshByHive(hiveId: Long)
 }

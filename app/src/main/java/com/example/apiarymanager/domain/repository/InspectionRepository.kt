@@ -9,4 +9,5 @@ interface InspectionRepository {
     suspend fun insertInspection(inspection: Inspection): Long
     suspend fun updateInspection(inspection: Inspection)
     suspend fun deleteInspection(id: Long)
+    suspend fun refreshByHive(hiveId: Long)
 }

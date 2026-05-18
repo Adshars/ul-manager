@@ -49,12 +49,20 @@ fun ForgotPasswordScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                ForgotPasswordEvent.NavigateBack          -> onNavigateBack()
-                is ForgotPasswordEvent.ShowMessage        -> snackbarHostState.showSnackbar(event.message)
+                ForgotPasswordEvent.NavigateBack   -> onNavigateBack()
+                is ForgotPasswordEvent.ShowMessage -> snackbarHostState.showSnackbar(event.message)
+                is ForgotPasswordEvent.OpenUrl     -> {
+                    val intent = android.content.Intent(
+                        android.content.Intent.ACTION_VIEW,
+                        android.net.Uri.parse(event.url)
+                    )
+                    context.startActivity(intent)
+                }
             }
         }
     }

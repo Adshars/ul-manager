@@ -97,25 +97,46 @@ fun AiAnalysisScreen(
             )
         }
     ) { innerPadding ->
-        when (uiState.step) {
-            AiAnalysisStep.SELECT_PHOTO -> SelectPhotoStep(
-                photos   = uiState.photos,
-                onSelect = viewModel::onPhotoSelected,
-                modifier = Modifier.padding(innerPadding)
-            )
-            AiAnalysisStep.FORM -> FormStep(
-                uiState  = uiState,
-                onNoteChange         = viewModel::onNoteChange,
-                onAnalysisTypeChange = viewModel::onAnalysisTypeChange,
-                onRunAnalysis        = viewModel::onRunAnalysis,
-                modifier = Modifier.padding(innerPadding)
-            )
-            AiAnalysisStep.ANALYZING -> AnalyzingStep(modifier = Modifier.padding(innerPadding))
-            AiAnalysisStep.RESULT    -> ResultStep(
-                uiState  = uiState,
-                onFinish = viewModel::onFinish,
-                modifier = Modifier.padding(innerPadding)
-            )
+        if (uiState.isUploading) {
+            Box(
+                modifier        = Modifier.fillMaxSize().padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier            = Modifier.padding(32.dp)
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(56.dp), strokeWidth = 4.dp)
+                    Spacer(Modifier.height(20.dp))
+                    Text(
+                        text      = "Przesyłanie zdjęć na serwer…",
+                        style     = MaterialTheme.typography.bodyLarge,
+                        color     = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        } else {
+            when (uiState.step) {
+                AiAnalysisStep.SELECT_PHOTO -> SelectPhotoStep(
+                    photos   = uiState.photos,
+                    onSelect = viewModel::onPhotoSelected,
+                    modifier = Modifier.padding(innerPadding)
+                )
+                AiAnalysisStep.FORM -> FormStep(
+                    uiState              = uiState,
+                    onNoteChange         = viewModel::onNoteChange,
+                    onAnalysisTypeChange = viewModel::onAnalysisTypeChange,
+                    onRunAnalysis        = viewModel::onRunAnalysis,
+                    modifier             = Modifier.padding(innerPadding)
+                )
+                AiAnalysisStep.ANALYZING -> AnalyzingStep(modifier = Modifier.padding(innerPadding))
+                AiAnalysisStep.RESULT    -> ResultStep(
+                    uiState  = uiState,
+                    onFinish = viewModel::onFinish,
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
         }
     }
 }

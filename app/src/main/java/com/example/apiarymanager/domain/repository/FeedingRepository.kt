@@ -10,4 +10,5 @@ interface FeedingRepository {
     suspend fun updateFeeding(feeding: Feeding)
     suspend fun deleteFeeding(id: Long)
     fun getTotalFeedingKgByApiary(apiaryId: Long): Flow<Float>
+    suspend fun refreshByHive(hiveId: Long)
 }

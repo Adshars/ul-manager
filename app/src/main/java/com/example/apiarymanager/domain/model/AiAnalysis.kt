@@ -11,7 +11,7 @@ enum class AnalysisType {
 }
 
 data class AnalysisRequest(
-    val photoPath: String,
+    val photo: HivePhoto,
     val note: String,
     val type: AnalysisType
 )

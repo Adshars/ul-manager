@@ -10,4 +10,5 @@ data class ForgotPasswordUiState(
 sealed interface ForgotPasswordEvent {
     data object NavigateBack : ForgotPasswordEvent
     data class ShowMessage(val message: String) : ForgotPasswordEvent
+    data class OpenUrl(val url: String) : ForgotPasswordEvent
 }

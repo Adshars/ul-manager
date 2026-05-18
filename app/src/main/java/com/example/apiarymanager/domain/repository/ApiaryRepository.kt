@@ -9,4 +9,5 @@ interface ApiaryRepository {
     suspend fun insertApiary(apiary: Apiary): Long
     suspend fun updateApiary(apiary: Apiary)
     suspend fun deleteApiary(id: Long)
+    suspend fun refresh()
 }

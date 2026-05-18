@@ -31,6 +31,10 @@ class HiveListViewModel @Inject constructor(
     private val apiaryId = route.apiaryId
 
     private val _events = Channel<HiveListEvent>(Channel.BUFFERED)
+
+    init {
+        viewModelScope.launch { runCatching { hiveRepository.refreshByApiary(apiaryId) } }
+    }
     val events = _events.receiveAsFlow()
 
     private val _moveDialogHive = kotlinx.coroutines.flow.MutableStateFlow<Hive?>(null)

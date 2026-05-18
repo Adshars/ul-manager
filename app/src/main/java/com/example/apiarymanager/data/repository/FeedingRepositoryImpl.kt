@@ -1,8 +1,11 @@
 package com.example.apiarymanager.data.repository
 
 import com.example.apiarymanager.data.local.dao.FeedingDao
+import com.example.apiarymanager.data.mapper.toCreateRequest
 import com.example.apiarymanager.data.mapper.toDomain
 import com.example.apiarymanager.data.mapper.toEntity
+import com.example.apiarymanager.data.mapper.toUpdateRequest
+import com.example.apiarymanager.data.remote.source.FeedingSource
 import com.example.apiarymanager.domain.model.Feeding
 import com.example.apiarymanager.domain.repository.FeedingRepository
 import kotlinx.coroutines.flow.Flow
@@ -10,7 +13,8 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class FeedingRepositoryImpl @Inject constructor(
-    private val dao: FeedingDao
+    private val dao: FeedingDao,
+    private val feedingSource: FeedingSource
 ) : FeedingRepository {
 
     override fun getFeedingsByHive(hiveId: Long): Flow<List<Feeding>> =
@@ -19,14 +23,31 @@ class FeedingRepositoryImpl @Inject constructor(
     override fun getFeedingById(id: Long): Flow<Feeding?> =
         dao.getFeedingById(id).map { it?.toDomain() }
 
-    override suspend fun insertFeeding(feeding: Feeding): Long =
-        dao.insertFeeding(feeding.toEntity())
+    override suspend fun refreshByHive(hiveId: Long) {
+        feedingSource.getByHive(hiveId)
+            .onSuccess { items ->
+                dao.deleteByHive(hiveId)
+                dao.insertAll(items.map { it.toEntity() })
+            }
+    }
 
-    override suspend fun updateFeeding(feeding: Feeding) =
-        dao.updateFeeding(feeding.toEntity())
+    override suspend fun insertFeeding(feeding: Feeding): Long {
+        val server = feedingSource.create(feeding.toCreateRequest()).getOrThrow()
+        dao.insertFeeding(server.toEntity())
+        return server.id
+    }
 
-    override suspend fun deleteFeeding(id: Long) =
+    override suspend fun updateFeeding(feeding: Feeding) {
+        feedingSource.getById(feeding.id).getOrThrow()
+        val server = feedingSource.update(feeding.id, feeding.toUpdateRequest()).getOrThrow()
+        dao.updateFeeding(server.toEntity())
+    }
+
+    override suspend fun deleteFeeding(id: Long) {
+        feedingSource.getById(id).getOrThrow()
+        feedingSource.delete(id).getOrThrow()
         dao.deleteFeeding(id)
+    }
 
     override fun getTotalFeedingKgByApiary(apiaryId: Long): Flow<Float> =
         dao.getTotalFeedingKgByApiary(apiaryId)

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.example.apiarymanager.core.util.toUserMessage
 import com.example.apiarymanager.domain.model.HoneyHarvest
 import com.example.apiarymanager.domain.repository.HoneyHarvestRepository
 import com.example.apiarymanager.presentation.navigation.HarvestFormRoute
@@ -68,9 +69,16 @@ class HarvestFormViewModel @Inject constructor(
         )
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            if (harvestId == null) repository.insertHarvest(harvest)
-            else                   repository.updateHarvest(harvest)
-            _events.send(HarvestFormEvent.NavigateBack)
+            runCatching {
+                if (harvestId == null) repository.insertHarvest(harvest)
+                else                   repository.updateHarvest(harvest)
+            }.onSuccess {
+                _events.send(HarvestFormEvent.ShowMessage("Miodobranie zapisane"))
+                _events.send(HarvestFormEvent.NavigateBack)
+            }.onFailure { e ->
+                _uiState.update { it.copy(isSaving = false) }
+                _events.send(HarvestFormEvent.ShowMessage(e.toUserMessage()))
+            }
         }
     }
 }

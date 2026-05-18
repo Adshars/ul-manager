@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.example.apiarymanager.core.util.toUserMessage
 import com.example.apiarymanager.domain.model.Feeding
 import com.example.apiarymanager.domain.repository.FeedingRepository
 import com.example.apiarymanager.presentation.navigation.FeedingFormRoute
@@ -64,9 +65,16 @@ class FeedingFormViewModel @Inject constructor(
         )
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            if (feedingId == null) repository.insertFeeding(feeding)
-            else                   repository.updateFeeding(feeding)
-            _events.send(FeedingFormEvent.NavigateBack)
+            runCatching {
+                if (feedingId == null) repository.insertFeeding(feeding)
+                else                   repository.updateFeeding(feeding)
+            }.onSuccess {
+                _events.send(FeedingFormEvent.ShowMessage("Dokarmianie zapisane"))
+                _events.send(FeedingFormEvent.NavigateBack)
+            }.onFailure { e ->
+                _uiState.update { it.copy(isSaving = false) }
+                _events.send(FeedingFormEvent.ShowMessage(e.toUserMessage()))
+            }
         }
     }
 }
