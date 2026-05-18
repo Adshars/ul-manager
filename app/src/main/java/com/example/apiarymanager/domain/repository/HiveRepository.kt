@@ -14,4 +14,5 @@ interface HiveRepository {
     fun getAllHives(): Flow<List<Hive>>
     suspend fun getDistinctQueenYears(): List<Int>
     suspend fun refreshByApiary(apiaryId: Long)
+    suspend fun regenerateQr(hiveId: Long): Hive
 }

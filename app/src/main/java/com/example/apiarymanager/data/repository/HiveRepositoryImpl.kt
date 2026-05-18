@@ -41,7 +41,8 @@ class HiveRepositoryImpl @Inject constructor(
     override suspend fun updateHive(hive: Hive) {
         hiveSource.getById(hive.id).getOrThrow()
         val server = hiveSource.update(hive.id, hive.toUpdateRequest()).getOrThrow()
-        dao.updateHive(server.toEntity())
+        // PUT /hives/{id} doesn't manage qrCode — preserve the local value
+        dao.updateHive(server.copy(qrCode = hive.qrCode).toEntity())
     }
 
     override suspend fun deleteHive(id: Long) {
@@ -53,8 +54,19 @@ class HiveRepositoryImpl @Inject constructor(
     override fun getActiveHiveCount(apiaryId: Long): Flow<Int> =
         dao.getActiveHiveCount(apiaryId)
 
-    override suspend fun getHiveByQrCode(qrCode: String): Hive? =
-        dao.getHiveByQrCode(qrCode)?.toDomain()
+    override suspend fun getHiveByQrCode(qrCode: String): Hive? {
+        dao.getHiveByQrCode(qrCode)?.let { return it.toDomain() }
+        return hiveSource.getByQrCode(qrCode)
+            .onSuccess { hive -> dao.insertHive(hive.toEntity()) }
+            .getOrNull()
+    }
+
+    override suspend fun regenerateQr(hiveId: Long): Hive {
+        hiveSource.getById(hiveId).getOrThrow()
+        val updated = hiveSource.regenerateQr(hiveId).getOrThrow()
+        dao.updateHive(updated.toEntity())
+        return updated
+    }
 
     override fun getAllHives(): Flow<List<Hive>> =
         dao.getAllHives().map { entities -> entities.map { it.toDomain() } }
