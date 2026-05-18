@@ -48,12 +48,9 @@ class HiveFormViewModel @Inject constructor(
     }
 
     private fun loadAvailableQueenYears() {
-        viewModelScope.launch {
-            val fromDb = hiveRepository.getDistinctQueenYears()
-            val currentYear = LocalDate.now().year
-            val years = (fromDb + currentYear).distinct().sortedDescending()
-            _uiState.update { it.copy(availableQueenYears = years) }
-        }
+        val currentYear = LocalDate.now().year
+        val years = (currentYear downTo currentYear - 10).toList()
+        _uiState.update { it.copy(availableQueenYears = years) }
     }
 
     private fun loadHive(id: Long) {
@@ -61,18 +58,24 @@ class HiveFormViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             hiveRepository.getHiveById(id).collect { hive ->
                 hive?.let { h ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading    = false,
-                            name         = h.name,
-                            number       = h.number.toString(),
-                            queenYear    = h.queenYear,
-                            frameType    = h.frameType,
+                    _uiState.update { current ->
+                        val years = if (h.queenYear != null && h.queenYear !in current.availableQueenYears) {
+                            (current.availableQueenYears + h.queenYear).sortedDescending()
+                        } else {
+                            current.availableQueenYears
+                        }
+                        current.copy(
+                            isLoading     = false,
+                            name          = h.name,
+                            number        = h.number.toString(),
+                            queenYear     = h.queenYear,
+                            availableQueenYears = years,
+                            frameType     = h.frameType,
                             superboxCount = h.superboxCount.toString(),
-                            queenOrigin  = h.queenOrigin,
-                            status       = h.status.name,
-                            notes        = h.notes,
-                            qrCode       = h.qrCode.ifBlank { it.qrCode } // keep generated UUID if DB has none
+                            queenOrigin   = h.queenOrigin,
+                            status        = h.status.name,
+                            notes         = h.notes,
+                            qrCode        = h.qrCode.ifBlank { current.qrCode }
                         )
                     }
                 }

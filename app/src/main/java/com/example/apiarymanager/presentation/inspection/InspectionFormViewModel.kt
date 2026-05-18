@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.apiarymanager.core.util.toUserMessage
 import com.example.apiarymanager.domain.model.ColonyStrength
-import com.example.apiarymanager.domain.repository.HiveRepository
 import com.example.apiarymanager.domain.repository.InspectionRepository
 import com.example.apiarymanager.domain.usecase.SaveInspectionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +23,6 @@ import javax.inject.Inject
 class InspectionFormViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val inspectionRepository: InspectionRepository,
-    private val hiveRepository: HiveRepository,
     private val saveInspectionUseCase: SaveInspectionUseCase
 ) : ViewModel() {
 
@@ -65,11 +63,9 @@ class InspectionFormViewModel @Inject constructor(
     }
 
     private fun loadAvailableQueenYears() {
-        viewModelScope.launch {
-            val fromDb = hiveRepository.getDistinctQueenYears()
-            val years  = (fromDb + LocalDate.now().year).distinct().sortedDescending()
-            _uiState.update { it.copy(availableQueenYears = years) }
-        }
+        val currentYear = LocalDate.now().year
+        val years = (currentYear downTo currentYear - 10).toList()
+        _uiState.update { it.copy(availableQueenYears = years) }
     }
 
     // ─── Field updates ────────────────────────────────────────────────────────
