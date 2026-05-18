@@ -280,12 +280,9 @@ fun AppNavGraph(
             CameraScreen(
                 outputDir = route.outputDir,
                 onPhotoTaken = { path ->
-                    // CameraX delivers an absolute file path; convert to file:// URI so
-                    // it is handled uniformly alongside content:// gallery URIs downstream.
-                    val uri = android.net.Uri.fromFile(java.io.File(path)).toString()
                     navController.previousBackStackEntry
                         ?.savedStateHandle
-                        ?.set("capturedPhotoPath", uri)
+                        ?.set("capturedPhotoPath", path)
                     navController.popBackStack()
                 },
                 onNavigateBack = { navController.popBackStack() }
