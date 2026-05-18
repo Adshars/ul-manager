@@ -6,6 +6,6 @@ data class RegisterUiState(
 )
 
 sealed interface RegisterEvent {
-    data object NavigateToDashboard : RegisterEvent
-    data object NavigateBack : RegisterEvent
+    data object NavigateToOnboardingPin : RegisterEvent
+    data object NavigateBack            : RegisterEvent
 }

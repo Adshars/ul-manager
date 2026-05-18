@@ -34,7 +34,7 @@ import com.example.apiarymanager.presentation.theme.ApiaryManagerTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
-    onNavigateToDashboard: () -> Unit,
+    onNavigateToOnboardingPin: () -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: RegisterViewModel = hiltViewModel()
 ) {
@@ -44,8 +44,8 @@ fun RegisterScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                RegisterEvent.NavigateToDashboard -> onNavigateToDashboard()
-                RegisterEvent.NavigateBack        -> onNavigateBack()
+                RegisterEvent.NavigateToOnboardingPin -> onNavigateToOnboardingPin()
+                RegisterEvent.NavigateBack            -> onNavigateBack()
             }
         }
     }
