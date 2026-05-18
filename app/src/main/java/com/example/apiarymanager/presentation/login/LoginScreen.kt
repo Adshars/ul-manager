@@ -32,7 +32,8 @@ import com.example.apiarymanager.presentation.theme.ApiaryManagerTheme
 
 @Composable
 fun LoginScreen(
-    onNavigateToDashboard: () -> Unit,
+    onNavigateToPinUnlock: () -> Unit,
+    onNavigateToOnboardingPin: () -> Unit,
     onNavigateToRegister: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
@@ -42,8 +43,9 @@ fun LoginScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                LoginEvent.NavigateToDashboard -> onNavigateToDashboard()
-                LoginEvent.NavigateToRegister  -> onNavigateToRegister()
+                LoginEvent.NavigateToPinUnlock    -> onNavigateToPinUnlock()
+                LoginEvent.NavigateToOnboardingPin -> onNavigateToOnboardingPin()
+                LoginEvent.NavigateToRegister     -> onNavigateToRegister()
             }
         }
     }

@@ -29,6 +29,8 @@ import com.example.apiarymanager.presentation.inspection.InspectionFormScreen
 import com.example.apiarymanager.presentation.login.LoginScreen
 import com.example.apiarymanager.presentation.onboarding.OnboardingCarouselScreen
 import com.example.apiarymanager.presentation.onboarding.PinScreen
+import com.example.apiarymanager.presentation.pin.ChangePinScreen
+import com.example.apiarymanager.presentation.pin.PinUnlockScreen
 import com.example.apiarymanager.presentation.register.RegisterScreen
 import com.example.apiarymanager.presentation.settings.SettingsScreen
 import com.example.apiarymanager.presentation.statistics.StatisticsScreen
@@ -52,8 +54,13 @@ fun AppNavGraph(
 
         composable<LoginRoute> {
             LoginScreen(
-                onNavigateToDashboard = {
-                    navController.navigate(DashboardRoute()) {
+                onNavigateToPinUnlock = {
+                    navController.navigate(PinUnlockRoute) {
+                        popUpTo(LoginRoute) { inclusive = true }
+                    }
+                },
+                onNavigateToOnboardingPin = {
+                    navController.navigate(OnboardingPinRoute) {
                         popUpTo(LoginRoute) { inclusive = true }
                     }
                 },
@@ -63,8 +70,8 @@ fun AppNavGraph(
 
         composable<RegisterRoute> {
             RegisterScreen(
-                onNavigateToDashboard = {
-                    navController.navigate(DashboardRoute()) {
+                onNavigateToOnboardingPin = {
+                    navController.navigate(OnboardingPinRoute) {
                         popUpTo(LoginRoute) { inclusive = true }
                     }
                 },
@@ -97,6 +104,27 @@ fun AppNavGraph(
                         popUpTo(OnboardingPinRoute) { inclusive = true }
                     }
                 }
+            )
+        }
+
+        composable<PinUnlockRoute> {
+            PinUnlockScreen(
+                onNavigateToDashboard = {
+                    navController.navigate(DashboardRoute()) {
+                        popUpTo(PinUnlockRoute) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(LoginRoute) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable<ChangePinRoute> {
+            ChangePinScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -169,6 +197,7 @@ fun AppNavGraph(
                         popUpTo(0) { inclusive = true }
                     }
                 },
+                onNavigateToChangePin = { navController.navigate(ChangePinRoute) },
                 onOpenDrawer = onOpenDrawer
             )
         }

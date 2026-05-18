@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.apiarymanager.core.auth.MsalAuthManager
+import com.example.apiarymanager.core.security.PinManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val msalAuthManager: MsalAuthManager
+    private val msalAuthManager: MsalAuthManager,
+    private val pinManager: PinManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -28,7 +30,7 @@ class LoginViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             if (msalAuthManager.isSignedIn()) {
-                _events.send(LoginEvent.NavigateToDashboard)
+                _events.send(postLoginEvent())
             }
         }
     }
@@ -37,7 +39,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, generalError = null) }
             msalAuthManager.signIn(activity)
-                .onSuccess { _events.send(LoginEvent.NavigateToDashboard) }
+                .onSuccess { _events.send(postLoginEvent()) }
                 .onFailure { e ->
                     _uiState.update {
                         it.copy(isLoading = false, generalError = e.message ?: "Błąd logowania")
@@ -45,6 +47,10 @@ class LoginViewModel @Inject constructor(
                 }
         }
     }
+
+    private fun postLoginEvent(): LoginEvent =
+        if (pinManager.isPinSet) LoginEvent.NavigateToPinUnlock
+        else LoginEvent.NavigateToOnboardingPin
 
     fun onRegisterClick() {
         viewModelScope.launch { _events.send(LoginEvent.NavigateToRegister) }

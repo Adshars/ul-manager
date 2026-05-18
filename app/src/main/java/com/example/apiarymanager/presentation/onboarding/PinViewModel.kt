@@ -68,11 +68,6 @@ class PinViewModel @Inject constructor(
         _uiState.update { it.copy(isBiometricEnabled = enabled) }
     }
 
-    fun onSkip() {
-        pinManager.isOnboardingDone = true
-        viewModelScope.launch { _events.send(PinEvent.NavigateToDashboard) }
-    }
-
     private fun validateAndSave(pin: String, confirm: String) {
         if (pin != confirm) {
             _uiState.update { it.copy(confirmPin = "", error = "PINy nie są zgodne. Spróbuj ponownie.") }

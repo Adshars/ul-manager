@@ -35,7 +35,7 @@ class RegisterViewModel @Inject constructor(
                 .onSuccess {
                     runCatching { authApi.register(RegisterRequest()) }
                     _uiState.update { it.copy(isLoading = false) }
-                    _events.send(RegisterEvent.NavigateToDashboard)
+                    _events.send(RegisterEvent.NavigateToOnboardingPin)
                 }
                 .onFailure { e ->
                     _uiState.update {

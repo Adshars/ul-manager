@@ -87,6 +87,14 @@ import kotlinx.serialization.Serializable
     val taskId: Long? = null
 )
 
+// ─── PIN / Biometric ──────────────────────────────────────────────────────────
+
+/** Full-screen PIN unlock after Microsoft login. */
+@Serializable data object PinUnlockRoute
+
+/** Change existing PIN (verify current → enter new → confirm new). */
+@Serializable data object ChangePinRoute
+
 // ─── AI Analysis ──────────────────────────────────────────────────────────────
 
 @Serializable data class AiAnalysisRoute(val hiveId: Long)
