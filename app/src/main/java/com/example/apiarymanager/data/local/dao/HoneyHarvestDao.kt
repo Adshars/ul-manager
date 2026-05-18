@@ -36,4 +36,7 @@ interface HoneyHarvestDao {
 
     @Query("DELETE FROM honey_harvests WHERE id = :id")
     suspend fun deleteHarvest(id: Long)
+
+    @Query("DELETE FROM honey_harvests WHERE hive_id = :hiveId")
+    suspend fun deleteByHive(hiveId: Long)
 }

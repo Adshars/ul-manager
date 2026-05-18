@@ -1,17 +1,49 @@
 package com.example.apiarymanager.data.dto
 
-/**
- * DTO representing the API contract for a Task.
- * [priority] mirrors enum: "LOW" | "MEDIUM" | "HIGH"
- */
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.Serializable
+
+/** [priority] mirrors enum: "LOW" | "MEDIUM" | "HIGH" */
+@Serializable
 data class TaskDto(
     val id: Long,
-    val apiaryId: Long?,
-    val hiveId: Long?,
+    val apiaryId: Long? = null,
+    val hiveId: Long? = null,
     val title: String,
-    val description: String,
-    val dueDate: String?,       // ISO-8601 or null
-    val priority: String,
-    val isCompleted: Boolean,
-    val createdAt: String       // ISO-8601
+    val description: String = "",
+    val dueDate: String? = null,
+    val priority: String = "MEDIUM",
+    val isCompleted: Boolean = false,
+    val createdAt: String = "",
+    val emailNotificationEnabled: Boolean = false,
+    val notificationAt: String? = null
+)
+
+@Serializable
+data class CreateTaskRequest(
+    val title: String,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val description: String? = null,
+    val priority: Int = 1,
+    val apiaryId: Long? = null,
+    val hiveId: Long? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val dueDate: String? = null,
+    val emailNotificationEnabled: Boolean = false,
+    val notificationAt: String? = null
+)
+
+@Serializable
+data class UpdateTaskRequest(
+    val title: String,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val description: String? = null,
+    val priority: Int = 1,
+    val apiaryId: Long? = null,
+    val hiveId: Long? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val dueDate: String? = null,
+    val emailNotificationEnabled: Boolean = false,
+    val notificationAt: String? = null
+)
+
+@Serializable
+data class CompleteTaskRequest(
+    val completed: Boolean
 )

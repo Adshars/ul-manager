@@ -185,7 +185,7 @@ private fun InspectionFormContent(
                 runCatching {
                     val dest = File(dir, "gallery_${System.currentTimeMillis()}_${(1000..9999).random()}.jpg")
                     context.contentResolver.openInputStream(uri)?.use { it.copyTo(dest.outputStream()) }
-                    Uri.fromFile(dest).toString()
+                    dest.absolutePath
                 }.getOrNull()
             }
             withContext(Dispatchers.Main) { viewModel.onPhotosFromGallery(paths) }

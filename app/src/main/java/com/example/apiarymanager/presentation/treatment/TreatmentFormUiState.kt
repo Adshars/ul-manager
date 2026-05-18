@@ -12,4 +12,5 @@ data class TreatmentFormUiState(
 
 sealed interface TreatmentFormEvent {
     data object NavigateBack : TreatmentFormEvent
+    data class ShowMessage(val message: String) : TreatmentFormEvent
 }

@@ -30,4 +30,5 @@ data class TaskFormUiState(
 
 sealed interface TaskFormEvent {
     data object NavigateBack : TaskFormEvent
+    data class ShowMessage(val message: String) : TaskFormEvent
 }

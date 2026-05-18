@@ -9,7 +9,8 @@ data class ApiaryFormUiState(
     val notes: String = "",
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
-    val nameError: String? = null
+    val nameError: String? = null,
+    val locationError: String? = null
 )
 
 sealed interface ApiaryFormEvent {

@@ -28,6 +28,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -60,10 +62,14 @@ fun FeedingFormScreen(
     viewModel: FeedingFormViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
     var showDatePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.events.collect { when (it) { FeedingFormEvent.NavigateBack -> onNavigateBack() } }
+        viewModel.events.collect { when (it) {
+            FeedingFormEvent.NavigateBack        -> onNavigateBack()
+            is FeedingFormEvent.ShowMessage      -> snackbarHostState.showSnackbar(it.message)
+        } }
     }
 
     if (showDatePicker) {
@@ -90,7 +96,8 @@ fun FeedingFormScreen(
                 title = { Text(if (feedingId == null) "Nowe dokarmianie" else "Edytuj dokarmianie") },
                 navigationIcon = { IconButton(onClick = viewModel::onBackClick) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) } }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(innerPadding).verticalScroll(rememberScrollState()).imePadding().padding(16.dp)

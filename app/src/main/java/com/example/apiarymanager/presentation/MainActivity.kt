@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.apiarymanager.core.auth.MsalAuthManager
 import com.example.apiarymanager.core.security.PinManager
 import com.example.apiarymanager.presentation.navigation.AppDrawerContent
 import com.example.apiarymanager.presentation.navigation.AppNavGraph
@@ -36,6 +37,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var pinManager: PinManager
+    @Inject lateinit var msalAuthManager: MsalAuthManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,10 +71,15 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onLogout = {
-                                    scope.launch { drawerState.close() }
-                                    pinManager.isOnboardingDone = false
-                                    navController.navigate(LoginRoute) {
-                                        popUpTo(0) { inclusive = true }
+                                    scope.launch {
+                                        drawerState.close()
+                                        kotlinx.coroutines.withTimeoutOrNull(5_000) {
+                                            msalAuthManager.signOut()
+                                        }
+                                        pinManager.isOnboardingDone = false
+                                        navController.navigate(LoginRoute) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
                                     }
                                 },
                                 onVoiceControl = {

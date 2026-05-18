@@ -1,0 +1,16 @@
+{
+  "client_id": "29c04dff-888b-43b0-8527-fb3831c2392b",
+  "authorization_user_agent": "DEFAULT",
+  "redirect_uri": "msauth://app.ulmanager.android/KG3CDHWbAoita1Ood2Tw%2BV%2Fjscw%3D",
+  "account_mode": "SINGLE",
+  "broker_redirect_uri_registered": false,
+  "authorities": [
+    {
+      "type": "AAD",
+      "audience": {
+        "type": "AzureADMyOrg",
+        "tenant_id": "1d88a782-39a7-49c3-adbe-83cee3a55ed3"
+      }
+    }
+  ]
+}

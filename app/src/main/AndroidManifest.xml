@@ -40,6 +40,21 @@
             </intent-filter>
         </activity>
 
+        <!-- MSAL redirect — required for Entra ID login flow -->
+        <activity
+            android:name="com.microsoft.identity.client.BrowserTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="msauth"
+                    android:host="app.ulmanager.android"
+                    android:path="/KG3CDHWbAoita1Ood2Tw+V/jscw=" />
+            </intent-filter>
+        </activity>
+
         <!-- FileProvider for sharing QR codes and photos -->
         <provider
             android:name="androidx.core.content.FileProvider"

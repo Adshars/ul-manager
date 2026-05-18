@@ -28,4 +28,7 @@ interface TreatmentDao {
 
     @Query("DELETE FROM treatments WHERE id = :id")
     suspend fun deleteTreatment(id: Long)
+
+    @Query("DELETE FROM treatments WHERE hive_id = :hiveId")
+    suspend fun deleteByHive(hiveId: Long)
 }

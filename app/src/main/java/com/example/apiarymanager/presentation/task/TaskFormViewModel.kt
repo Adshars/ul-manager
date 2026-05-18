@@ -7,6 +7,7 @@ import androidx.navigation.toRoute
 import com.example.apiarymanager.domain.model.Task
 import com.example.apiarymanager.domain.model.TaskPriority
 import com.example.apiarymanager.domain.repository.ApiaryRepository
+import com.example.apiarymanager.core.util.toUserMessage
 import com.example.apiarymanager.domain.repository.HiveRepository
 import com.example.apiarymanager.domain.repository.TaskRepository
 import com.example.apiarymanager.presentation.navigation.TaskFormRoute
@@ -157,9 +158,16 @@ class TaskFormViewModel @Inject constructor(
         )
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            if (taskId == null) taskRepository.insertTask(task)
-            else                taskRepository.updateTask(task)
-            _events.send(TaskFormEvent.NavigateBack)
+            runCatching {
+                if (taskId == null) taskRepository.insertTask(task)
+                else                taskRepository.updateTask(task)
+            }.onSuccess {
+                _events.send(TaskFormEvent.ShowMessage("Zadanie zapisane"))
+                _events.send(TaskFormEvent.NavigateBack)
+            }.onFailure { e ->
+                _uiState.update { it.copy(isSaving = false) }
+                _events.send(TaskFormEvent.ShowMessage(e.toUserMessage()))
+            }
         }
     }
 }

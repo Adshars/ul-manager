@@ -16,18 +16,22 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
-        versionName = "1.0.6"
+        versionName = "1.0.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"https://am-dev-api.azurewebsites.net/api\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "API_BASE_URL", "\"https://am-dev-api.azurewebsites.net/api\"")
         }
     }
 
@@ -38,10 +42,12 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+        freeCompilerArgs += listOf("-opt-in=kotlinx.serialization.ExperimentalSerializationApi")
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -77,8 +83,16 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // Serialization (required for @Serializable routes in Navigation Compose 2.8)
+    // Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // Retrofit + OkHttp
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.okhttp.logging)
+
+    // MSAL
+    implementation(libs.msal)
 
     // Vico charts
     implementation(libs.vico.compose.m3)

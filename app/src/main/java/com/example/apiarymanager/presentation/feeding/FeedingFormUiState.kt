@@ -12,4 +12,5 @@ data class FeedingFormUiState(
 
 sealed interface FeedingFormEvent {
     data object NavigateBack : FeedingFormEvent
+    data class ShowMessage(val message: String) : FeedingFormEvent
 }

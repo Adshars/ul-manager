@@ -12,4 +12,5 @@ data class HarvestFormUiState(
 
 sealed interface HarvestFormEvent {
     data object NavigateBack : HarvestFormEvent
+    data class ShowMessage(val message: String) : HarvestFormEvent
 }

@@ -2,6 +2,7 @@ package com.example.apiarymanager.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.apiarymanager.core.auth.MsalAuthManager
 import com.example.apiarymanager.core.security.PinManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -11,11 +12,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val pinManager: PinManager
+    private val pinManager: PinManager,
+    private val msalAuthManager: MsalAuthManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -94,7 +97,10 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onLogout() {
+        if (_uiState.value.isLoggingOut) return
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoggingOut = true) }
+            withTimeoutOrNull(5_000) { msalAuthManager.signOut() }
             pinManager.isOnboardingDone = false
             _events.send(SettingsEvent.NavigateToLogin)
         }
