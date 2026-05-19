@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Backup/transfer rules for API 31+.
+    EncryptedSharedPreferences cannot be restored after reinstall because the
+    Keystore key is deleted on uninstall — exclude it to prevent AEADBadTagException.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="apiary_secure_prefs.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="apiary_secure_prefs.xml" />
+    </device-transfer>
+</data-extraction-rules>
