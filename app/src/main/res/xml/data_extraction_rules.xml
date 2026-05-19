@@ -6,9 +6,13 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
+        <!-- EncryptedSharedPreferences cannot survive reinstall (Keystore key is deleted) -->
         <exclude domain="sharedpref" path="apiary_secure_prefs.xml" />
+        <!-- Room is a local cache of server data — always reload fresh from API -->
+        <exclude domain="database" path="apiary_manager.db" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="sharedpref" path="apiary_secure_prefs.xml" />
+        <exclude domain="database" path="apiary_manager.db" />
     </device-transfer>
 </data-extraction-rules>
