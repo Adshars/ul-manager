@@ -5,5 +5,8 @@
     Keystore key is deleted on uninstall — exclude it to prevent AEADBadTagException.
 -->
 <full-backup-content>
+    <!-- EncryptedSharedPreferences cannot survive reinstall (Keystore key is deleted) -->
     <exclude domain="sharedpref" path="apiary_secure_prefs.xml" />
+    <!-- Room is a local cache of server data — always reload fresh from API -->
+    <exclude domain="database" path="apiary_manager.db" />
 </full-backup-content>
